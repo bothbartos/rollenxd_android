@@ -7,10 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.bartosboth.rollen_android.navigation.RollenXdNavigation
 import com.bartosboth.rollen_android.ui.theme.Rollen_androidTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +21,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Rollen_androidTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                RollenXdApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun RollenXdApp(){
+    Scaffold { innerPadding ->
+        Surface(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            RollenXdNavigation()
+        }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Rollen_androidTheme {
-        Greeting("Android")
     }
 }
+
+
