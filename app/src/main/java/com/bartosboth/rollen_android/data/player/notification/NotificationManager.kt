@@ -1,4 +1,4 @@
-package com.bartosboth.rollen_android.ui.screens.player.notification
+package com.bartosboth.rollen_android.data.player.notification
 
 import android.Manifest
 import android.app.Notification

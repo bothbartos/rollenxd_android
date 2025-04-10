@@ -12,8 +12,8 @@ import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.network.AuthInterceptor
 import com.bartosboth.rollen_android.data.network.AuthService
 import com.bartosboth.rollen_android.data.network.SongAPI
-import com.bartosboth.rollen_android.ui.screens.player.notification.NotificationManager
-import com.bartosboth.rollen_android.ui.screens.player.service.SongServiceHandler
+import com.bartosboth.rollen_android.data.player.notification.NotificationManager
+import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.Module
 import dagger.Provides

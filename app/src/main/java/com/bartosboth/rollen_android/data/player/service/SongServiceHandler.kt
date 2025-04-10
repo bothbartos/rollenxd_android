@@ -1,4 +1,4 @@
-package com.bartosboth.rollen_android.ui.screens.player.service
+package com.bartosboth.rollen_android.data.player.service
 
 import android.content.Context
 import android.net.Uri

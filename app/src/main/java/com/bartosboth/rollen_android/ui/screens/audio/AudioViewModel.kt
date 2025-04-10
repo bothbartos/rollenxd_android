@@ -19,9 +19,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.AudioRepository
-import com.bartosboth.rollen_android.ui.screens.player.service.AudioState
-import com.bartosboth.rollen_android.ui.screens.player.service.PlayerEvent
-import com.bartosboth.rollen_android.ui.screens.player.service.SongServiceHandler
+import com.bartosboth.rollen_android.data.player.service.AudioState
+import com.bartosboth.rollen_android.data.player.service.PlayerEvent
+import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
