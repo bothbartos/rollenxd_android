@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import androidx.navigation.NavController
 import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.song.Song
 import kotlin.math.floor
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -195,9 +197,10 @@ fun MainScreen(
     ) {innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
             itemsIndexed(audioList) { index, song ->
-                AudioItem(audio = song) {
+                AudioItem(audio = song, 
+                    isPlaying = song.id == currentPlayingAudio.id) {
                     Log.d("LZYCLM_ID", "MainScreen: song clicked ${song.id}")
-                    onItemClick(index) // Assuming Song has an 'id' property
+                    onItemClick(index)
                 }
             }
         }
@@ -207,8 +210,20 @@ fun MainScreen(
 @Composable
 fun AudioItem(
     audio: Song,
-    onItemClick: () -> Unit,
+    isPlaying: Boolean,
+    onItemClick: () -> Unit
 ) {
+    val cardColor = if (isPlaying) CardColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        disabledContainerColor = MaterialTheme.colorScheme.surface,
+        disabledContentColor = MaterialTheme.colorScheme.onSurface
+    ) else CardColors(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        disabledContainerColor = MaterialTheme.colorScheme.surface,
+        disabledContentColor = MaterialTheme.colorScheme.onSurface,
+    )
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,6 +231,7 @@ fun AudioItem(
             .clickable {
                 onItemClick()
             },
+        colors = cardColor
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -243,8 +259,9 @@ fun AudioItem(
                 )
 
             }
+            Log.d("TAG", "AudioItem: ${audio.length}")
             Text(
-                text = timeStampToDuration(audio.length.toLong())
+                text = timeStampToDuration(audio.length)
             )
             Spacer(modifier = Modifier.size(8.dp))
         }
@@ -252,13 +269,15 @@ fun AudioItem(
     }
 }
 
-private fun timeStampToDuration(position: Long): String {
-    val totalSecond = floor(position / 1E3).toInt()
-    val minutes = totalSecond / 60
-    val remainingSeconds = totalSecond - (minutes * 60)
-    return if (position < 0) "--:--"
-    else "%d:%02d".format(minutes, remainingSeconds)
+private fun timeStampToDuration(position: Double): String {
+    if (position < 0) return "--:--"
+    val totalSeconds = position.roundToInt()
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "%02d:%02d".format(minutes, seconds)
 }
+
+
 
 @Preview()
 @Composable
