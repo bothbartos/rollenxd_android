@@ -1,4 +1,4 @@
-package com.bartosboth.rollen_android.ui.screens.login
+package com.bartosboth.rollen_android.ui.screens.register
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -24,29 +25,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoginScreen(
-    viewModel: LoginViewModel,
-    onNavigateToRegister: () -> Unit,
-    onLoginSuccess: () -> Unit
+fun RegisterScreen(
+    viewModel: RegisterViewModel,
+    onRegisterSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    val loginState by viewModel.loginState.collectAsState()
+    val registerState by viewModel.registerState.collectAsState()
 
-    LaunchedEffect(loginState) {
-        when (loginState) {
-            is LoginState.Success -> {
-                onLoginSuccess()
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is RegisterState.Success -> {
+                onRegisterSuccess()
             }
-            is LoginState.Error -> {
-                errorMessage = (loginState as LoginState.Error).message
+            is RegisterState.Error -> {
+                errorMessage = (registerState as RegisterState.Error).message
                 showError = true
             }
             else -> { /* Do nothing */ }
@@ -54,7 +58,7 @@ fun LoginScreen(
     }
 
     Surface(modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background){
+        color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,7 +67,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Login",
+                text = "Create Account",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -78,10 +82,31 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirm Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -96,25 +121,27 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.login(username, password) },
-                enabled = username.isNotEmpty() && password.isNotEmpty() && loginState !is LoginState.Loading,
+                onClick = { viewModel.register(username, password, email) },
+                enabled = username.isNotEmpty() && password.isNotEmpty() && email.isNotEmpty()
+                        && registerState !is RegisterState.Loading
+                        && password == confirmPassword,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (loginState is LoginState.Loading) {
+                if (registerState is RegisterState.Loading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
-                    Text("Login")
+                    Text("Register")
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = onNavigateToRegister) {
-                Text("Don't have an account? Sign up")
+            TextButton(onClick = onNavigateToLogin) {
+                Text("Already have an account? Log in")
             }
         }
     }
 }
-
