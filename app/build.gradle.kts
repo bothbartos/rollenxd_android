@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.kotlin.serialization)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -39,11 +43,30 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     hilt {
         enableAggregatingTask = false
     }
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("bartosboth.properties")
+
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+} else {
+    throw FileNotFoundException("Could not find bartosboth.properties file!")
+}
+
+android.buildTypes.forEach {
+    it.buildConfigField(
+        "String",
+        "BASE_URL",
+        "\"${localProperties.getProperty("BASE_URL")}\""
+    )
+}
+
 
 dependencies {
 
@@ -74,11 +97,25 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation (libs.androidx.media3.session)
+    implementation (libs.androidx.media3.datasource)
+
+
     //System accompanist
     implementation (libs.accompanist.systemuicontroller)
+    implementation (libs.accompanist.permissions)
+
+    //Glide
+    implementation(libs.glide)
 
     //Navigation
     implementation (libs.androidx.navigation.compose)
+
+    //Lifecycle viewmodel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    //Security
+    implementation(libs.androidx.security.crypto)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
