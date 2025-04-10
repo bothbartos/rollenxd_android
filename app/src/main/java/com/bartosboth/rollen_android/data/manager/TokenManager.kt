@@ -41,10 +41,14 @@ class TokenManager @Inject constructor(
         return sharedPreferences.getString(KEY_ACCESS_TOKEN, null)
     }
 
-    fun clearAccessToken() {
+    private fun clearAccessToken() {
         sharedPreferences.edit().remove(KEY_ACCESS_TOKEN).apply()
     }
     fun isLoggedIn(): Boolean {
         return !getAccessToken().isNullOrEmpty()
+    }
+
+    fun logout() {
+        clearAccessToken()
     }
 }

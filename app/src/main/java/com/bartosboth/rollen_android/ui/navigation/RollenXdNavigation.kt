@@ -1,6 +1,10 @@
 package com.bartosboth.rollen_android.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -11,38 +15,76 @@ import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
 import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
+import com.bartosboth.rollen_android.ui.screens.main.AuthState
+import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
+import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
+import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
 
 
 @Composable
 fun RollenXdNavigation() {
     val navController = rememberNavController()
-    val audioViewModel: AudioViewModel = hiltViewModel()
-    val loginViewModel: LoginViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val startDestination = remember {
+        if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
+    }
 
-
-    NavHost(navController = navController,
-        startDestination = if (TokenManager(LocalContext.current).isLoggedIn()) MainScreen else LoginScreen) {
-        composable<LoginScreen>{
-            LoginScreen(loginViewModel,
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable<LoginScreen> {
+            val loginViewModel: LoginViewModel = hiltViewModel()
+            LoginScreen(
+                loginViewModel,
+                onNavigateToRegister = { navController.navigate(RegisterScreen) },
                 onLoginSuccess = {
-                    navController.navigate(MainScreen){
-                        popUpTo<LoginScreen>()
+                    navController.navigate(MainScreen) {
+                        popUpTo(LoginScreen) { inclusive = true }
                     }
-            })
+                }
+            )
+        }
+
+        composable<RegisterScreen> {
+            val registerViewModel: RegisterViewModel = hiltViewModel()
+            RegisterScreen(
+                viewModel = registerViewModel,
+                onRegisterSuccess = {
+                    navController.navigate(LoginScreen) {
+                        popUpTo(RegisterScreen) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable<MainScreen> {
+            val audioViewModel: AudioViewModel = hiltViewModel()
+            val logoutViewModel: LogoutViewModel = hiltViewModel()
+            val authState by logoutViewModel.authState.collectAsState()
+
+            LaunchedEffect(authState) {
+                if (authState is AuthState.LoggedOut) {
+                    if(audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
+                    navController.navigate(LoginScreen) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+
             MainScreen(
-                navController,
+                logoutViewModel = logoutViewModel,
+                navController = navController,
                 progress = audioViewModel.progress,
-                onProgressChange = {audioViewModel.onUiEvent(uiEvents = UiEvents.UpdateProgress(it))},
+                onProgressChange = { audioViewModel.onUiEvent(UiEvents.UpdateProgress(it)) },
                 isAudioPlaying = audioViewModel.isPlaying,
                 currentPlayingAudio = audioViewModel.currentSelectedAudio,
                 audioList = audioViewModel.audioList,
-                onItemClick = {audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it))},
-                onStart = {audioViewModel.onUiEvent(UiEvents.PlayPause)},
-                onNext = {audioViewModel.onUiEvent(UiEvents.SeekToNext)},
+                onItemClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
+                onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                onNext = { audioViewModel.onUiEvent(UiEvents.SeekToNext) }
             )
         }
     }

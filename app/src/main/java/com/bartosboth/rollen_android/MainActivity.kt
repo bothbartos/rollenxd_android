@@ -19,15 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Rollen_androidTheme {
-                Scaffold {innerPadding ->
-
-                    Surface(
-                        modifier = Modifier.fillMaxSize().padding(innerPadding),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
                         RollenXdNavigation()
-                    }
-                }
             }
         }
     }
