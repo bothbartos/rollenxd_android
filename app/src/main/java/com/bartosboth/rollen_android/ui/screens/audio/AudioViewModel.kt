@@ -53,10 +53,12 @@ class AudioViewModel @Inject constructor(
     var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
     var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
-    var currentSelectedAudio by savedStateHandle.saveable {
-        mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
-    }
-    var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Song>()) }
+
+    private val _currentSelectedAudio = mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
+    val currentSelectedAudio: Song get() = _currentSelectedAudio.value
+
+    private val _audioList = mutableStateOf<List<Song>>(emptyList())
+    val audioList: List<Song> get() = _audioList.value
 
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -70,7 +72,7 @@ class AudioViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songs = repository.getAudioData()
-                audioList = songs
+                _audioList.value = songs
 
                 setMediaItems()
             } catch (e: Exception) {
@@ -105,7 +107,7 @@ class AudioViewModel @Inject constructor(
                 val selectedSong = audioList.find { it.id == songId }
                 Log.d("SELECTEDSONG", "playSong: selected song ${selectedSong?.id} ")
                 if (selectedSong != null) {
-                    currentSelectedAudio = selectedSong
+                    _currentSelectedAudio.value = selectedSong
                     songServiceHandler.playStreamingAudio(songId)
                 }
             } catch (e: Exception) {
@@ -154,7 +156,7 @@ class AudioViewModel @Inject constructor(
                     is AudioState.Current -> {
                         audioState.songId?.let { id ->
                             audioList.find { it.id == id }?.let { song ->
-                                currentSelectedAudio = song
+                                _currentSelectedAudio.value = song
                                 Log.d("CURRENT_SONG", "Updated to: ${song.title} by ${song.author}")
                             }
                         }
