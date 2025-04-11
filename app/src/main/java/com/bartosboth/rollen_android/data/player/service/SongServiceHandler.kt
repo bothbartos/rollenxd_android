@@ -3,9 +3,15 @@ package com.bartosboth.rollen_android.data.player.service
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.extractor.DefaultExtractorsFactory
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -63,7 +69,37 @@ class SongServiceHandler @Inject constructor(
             PlayerEvent.Forward -> exoPlayer.seekForward()
             PlayerEvent.SeekToNext -> exoPlayer.seekToNextMediaItem()
             PlayerEvent.PlayPause -> playOrPause()
-            PlayerEvent.SeekTo -> exoPlayer.seekTo(seekPosition)
+            PlayerEvent.SeekTo -> {
+                Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
+
+                // Save the playing state
+                val wasPlaying = exoPlayer.isPlaying
+                val currentPosition = exoPlayer.currentPosition
+                val isSeekingBackward = seekPosition < currentPosition
+
+                Log.d("SongServiceHandler", "Current position: $currentPosition, Seeking ${if(isSeekingBackward) "backward" else "forward"}")
+
+                try {
+                    // Disable playWhenReady temporarily to prevent auto-restart
+                    exoPlayer.playWhenReady = false
+
+                    // Perform the seek operation
+                    exoPlayer.seekTo(seekPosition)
+
+                    // Wait a moment for the seek to complete
+                    delay(100)
+
+                    // Restore playing state
+                    if (wasPlaying) {
+                        exoPlayer.playWhenReady = true
+                    }
+                } catch (e: Exception) {
+                    Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
+                }
+
+                // Update the progress state
+                _audioState.value = AudioState.Progress(seekPosition)
+            }
             PlayerEvent.SelectedAudioChange -> {
                 if (selectedAudioIndex != -1) {
                     exoPlayer.seekToDefaultPosition(selectedAudioIndex)

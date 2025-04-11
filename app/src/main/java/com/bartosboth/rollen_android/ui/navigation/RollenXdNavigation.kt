@@ -18,6 +18,7 @@ import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
 import com.bartosboth.rollen_android.ui.screens.main.AuthState
 import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
+import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
 
@@ -26,6 +27,7 @@ import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
 fun RollenXdNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val audioViewModel: AudioViewModel = hiltViewModel()
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
@@ -60,7 +62,6 @@ fun RollenXdNavigation() {
         }
 
         composable<MainScreen> {
-            val audioViewModel: AudioViewModel = hiltViewModel()
             val logoutViewModel: LogoutViewModel = hiltViewModel()
             val authState by logoutViewModel.authState.collectAsState()
 
@@ -85,6 +86,13 @@ fun RollenXdNavigation() {
                 onItemClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                 onNext = { audioViewModel.onUiEvent(UiEvents.SeekToNext) }
+            )
+        }
+
+        composable<PlayerScreen> {
+            PlayerScreen(
+                navController = navController,
+                viewModel = audioViewModel
             )
         }
     }

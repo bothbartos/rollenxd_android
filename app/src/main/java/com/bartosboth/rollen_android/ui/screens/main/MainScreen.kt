@@ -51,6 +51,8 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.song.Song
+import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
+import com.bartosboth.rollen_android.utils.timeStampToDuration
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -257,6 +259,7 @@ fun MainScreen(
                     isPlaying = song.id == currentPlayingAudio.id) {
                     Log.d("LZYCLM_ID", "MainScreen: song clicked ${song.id}")
                     onItemClick(index)
+                    navController.navigate(PlayerScreen)
                 }
             }
         }
@@ -325,13 +328,7 @@ fun AudioItem(
     }
 }
 
-private fun timeStampToDuration(position: Double): String {
-    if (position < 0) return "--:--"
-    val totalSeconds = position.roundToInt()
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "%02d:%02d".format(minutes, seconds)
-}
+
 
 
 
@@ -342,13 +339,13 @@ fun HomeScreenPrev() {
         progress = 0.5f,
         onProgressChange = {},
         audio = Song(
-            uri = "".toUri(),
-            author = "Dr. Assman",
-            length = 10000.0,
-            title = "Song Two",
-            numberOfLikes = 1,
+            title = "",
+            author = "",
+            coverBase64 = "",
+            length = 0.0,
+            isLiked = false,
             reShares = 1,
-            id = 1
+            id = 1L
         ),
         isAudioPlaying = true,
         onStart = {  },

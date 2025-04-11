@@ -33,13 +33,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private val audioDummy = Song(
-    uri = "".toUri(),
-    author = "",
-    length = 0.0,
     title = "",
-    numberOfLikes = 0,
+    author = "",
+    coverBase64 = "",
+    length = 0.0,
+    isLiked = false,
     reShares = 0,
-    id=2
+    id = 1L
 )
 
 @HiltViewModel
@@ -126,10 +126,19 @@ class AudioViewModel @Inject constructor(
                     isPlaying = !isPlaying
                     Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                 }
-                is UiEvents.SeekTo -> songServiceHandler.onPlayerEvents(
-                    PlayerEvent.SeekTo,
-                    seekPosition = ((duration * uiEvents.position) / 100f).toLong()
-                )
+                is UiEvents.SeekTo -> {
+                    val seekPositionMs = (duration * uiEvents.position).toLong()
+                    Log.d("SEEKING", "Seeking to position: $seekPositionMs ms (current progress: $progress)")
+
+                    // Temporarily update UI progress for better responsiveness
+                    progress = uiEvents.position * 100f
+
+                    // Perform the actual seek
+                    songServiceHandler.onPlayerEvents(
+                        PlayerEvent.SeekTo,
+                        seekPosition = seekPositionMs
+                    )
+                }
                 is UiEvents.SelectedAudioChange -> playSong(audioList[uiEvents.index].id)
                 is UiEvents.UpdateProgress -> progress = uiEvents.newProgress
             }
