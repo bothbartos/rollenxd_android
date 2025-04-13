@@ -54,7 +54,8 @@ class AudioViewModel @Inject constructor(
     var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
 
-    private val _currentSelectedAudio = mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
+    private val _currentSelectedAudio =
+        mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
     val currentSelectedAudio: Song get() = _currentSelectedAudio.value
 
     private val _audioList = mutableStateOf<List<Song>>(emptyList())
@@ -128,9 +129,13 @@ class AudioViewModel @Inject constructor(
                     isPlaying = !isPlaying
                     Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                 }
+
                 is UiEvents.SeekTo -> {
                     val seekPositionMs = (duration * uiEvents.position).toLong()
-                    Log.d("SEEKING", "Seeking to position: $seekPositionMs ms (current progress: $progress)")
+                    Log.d(
+                        "SEEKING",
+                        "Seeking to position: $seekPositionMs ms (current progress: $progress)"
+                    )
 
                     // Temporarily update UI progress for better responsiveness
                     progress = uiEvents.position * 100f
@@ -141,6 +146,7 @@ class AudioViewModel @Inject constructor(
                         seekPosition = seekPositionMs
                     )
                 }
+
                 is UiEvents.SelectedAudioChange -> playSong(audioList[uiEvents.index].id)
                 is UiEvents.UpdateProgress -> progress = uiEvents.newProgress
             }
@@ -161,10 +167,12 @@ class AudioViewModel @Inject constructor(
                             }
                         }
                     }
+
                     is AudioState.Playing -> {
                         isPlaying = audioState.isPlaying
                         Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                     }
+
                     is AudioState.Progress -> calculateProgressValue(audioState.progress)
                     is AudioState.Ready -> {
                         duration = audioState.duration
@@ -182,6 +190,32 @@ class AudioViewModel @Inject constructor(
         progressString = formatDuration(currentProgress)
     }
 
+    fun likeSong(id: Long) {
+        viewModelScope.launch {
+            try {
+                if(repository.likeSong(id) == 200) _currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = true)
+                _audioList.value = _audioList.value.map { song ->
+                    if (song.id == id) song.copy(isLiked = true) else song
+                }
+            } catch (e: Exception) {
+                Log.d("LIKE ERROR", "LIKE ERROR: ${e.message}")
+            }
+        }
+    }
+
+    fun unlikeSong(id: Long) {
+        viewModelScope.launch {
+            try {
+                if(repository.unlikeSong(id) == 200)_currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = false)
+                _audioList.value = _audioList.value.map { song ->
+                    if (song.id == id) song.copy(isLiked = false) else song
+                }
+            } catch (e: Exception) {
+                Log.d("UNLIKE ERROR", "UNLIKE ERROR: ${e.message}")
+            }
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     private fun formatDuration(currentProgress: Long): String {
         val minutes = TimeUnit.MILLISECONDS.toMinutes(currentProgress)
@@ -190,7 +224,6 @@ class AudioViewModel @Inject constructor(
         return String.format("%02d:%02d", minutes, seconds)
     }
 }
-
 
 
 sealed class UiState {

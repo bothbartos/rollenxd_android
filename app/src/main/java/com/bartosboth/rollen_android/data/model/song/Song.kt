@@ -10,7 +10,7 @@ data class Song(
     val author: String,
     val coverBase64: String,
     val length: Double,
-    val isLiked: Boolean,
+    var isLiked: Boolean,
     val reShares: Int,
     val id: Long
     ): Parcelable

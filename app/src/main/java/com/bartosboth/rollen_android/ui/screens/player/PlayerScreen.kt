@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -148,9 +149,13 @@ fun PlayerScreen(
                     }
 
                     // Like/unlike button
-                    IconButton(onClick = { /* Handle like/unlike */ }) {
+                    IconButton(onClick = {
+                        if(viewModel.currentSelectedAudio.isLiked)
+                            viewModel.unlikeSong(viewModel.currentSelectedAudio.id)
+                        else viewModel.likeSong(viewModel.currentSelectedAudio.id)
+                    }) {
                         Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
+                            imageVector = if(viewModel.currentSelectedAudio.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = "Like",
                             tint = MaterialTheme.colorScheme.primary
                         )
