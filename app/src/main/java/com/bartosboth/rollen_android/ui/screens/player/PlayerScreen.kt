@@ -43,6 +43,12 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
+import com.bartosboth.rollen_android.ui.components.CoverImage
+import com.bartosboth.rollen_android.ui.components.LargePlayPauseButton
+import com.bartosboth.rollen_android.ui.components.LikeButton
+import com.bartosboth.rollen_android.ui.components.MediaControlButton
+import com.bartosboth.rollen_android.ui.components.ProgressSlider
+import com.bartosboth.rollen_android.ui.components.SongInfo
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
@@ -86,30 +92,20 @@ fun PlayerScreen(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Middle section with album cover (give it more weight)
+            // Middle section with album cover
             Box(
                 modifier = Modifier
                     .weight(4f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Surface(
-                    modifier = Modifier
-                        .size(300.dp),
-                    shadowElevation = 8.dp,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(convertBase64ToByteArr(viewModel.currentSelectedAudio.coverBase64))
-                            .memoryCacheKey(viewModel.currentSelectedAudio.id.toString())
-                            .placeholderMemoryCacheKey(viewModel.currentSelectedAudio.id.toString())
-                            .build(),
-                        contentDescription = "Cover",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                CoverImage(
+                    coverBase64 = viewModel.currentSelectedAudio.coverBase64,
+                    songId = viewModel.currentSelectedAudio.id,
+                    size = 300.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    shadowElevation = 8.dp
+                )
             }
 
             // Bottom section with controls
@@ -124,43 +120,36 @@ fun PlayerScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Song and artist info
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = viewModel.currentSelectedAudio.title ?: "Unknown title",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    SongInfo(
+                        title = viewModel.currentSelectedAudio.title,
+                        artist = viewModel.currentSelectedAudio.author,
+                        titleStyle = MaterialTheme.typography.headlineSmall,
+                        artistStyle = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f)
+                    )
 
-                        Text(
-                            text = viewModel.currentSelectedAudio.author ?: "Unknown author",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    // Like/unlike button
-                    IconButton(onClick = {
-                        if(viewModel.currentSelectedAudio.isLiked)
-                            viewModel.unlikeSong(viewModel.currentSelectedAudio.id)
-                        else viewModel.likeSong(viewModel.currentSelectedAudio.id)
-                    }) {
-                        Icon(
-                            imageVector = if(viewModel.currentSelectedAudio.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Like",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    LikeButton(
+                        isLiked = viewModel.currentSelectedAudio.isLiked,
+                        onClick = {
+                            if (viewModel.currentSelectedAudio.isLiked) {
+                                viewModel.unlikeSong(viewModel.currentSelectedAudio.id)
+                            } else {
+                                viewModel.likeSong(viewModel.currentSelectedAudio.id)
+                            }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Progress bar
-                PlayerProgressBar(viewModel)
+                ProgressSlider(
+                    progress = viewModel.progress,
+                    duration = viewModel.duration,
+                    currentTime = viewModel.progressString,
+                    totalDuration = viewModel.currentSelectedAudio.length,
+                    onSeek = { viewModel.onUiEvent(UiEvents.SeekTo(it)) }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -171,99 +160,28 @@ fun PlayerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Previous button
-                    IconButton(
-                        onClick = { viewModel.onUiEvent(UiEvents.Backward) },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.skip_prev),
-                            contentDescription = "Previous",
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
+                    MediaControlButton(
+                        icon = R.drawable.skip_prev,
+                        contentDescription = "Previous",
+                        onClick = { viewModel.onUiEvent(UiEvents.Backward) }
+                    )
 
                     // Play/Pause button
-                    IconButton(
-                        onClick = { viewModel.onUiEvent(UiEvents.PlayPause) },
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape
-                            )
-                    ) {
-                        Icon(
-                            painter = if (isPlaying) painterResource(R.drawable.pause) else painterResource(R.drawable.play_arrow),
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
+                    LargePlayPauseButton(
+                        isPlaying = isPlaying,
+                        onClick = { viewModel.onUiEvent(UiEvents.PlayPause) }
+                    )
 
                     // Next button
-                    IconButton(
-                        onClick = { viewModel.onUiEvent(UiEvents.SeekToNext) },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.skip_next),
-                            contentDescription = "Next",
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
+                    MediaControlButton(
+                        icon = R.drawable.skip_next,
+                        contentDescription = "Next",
+                        onClick = { viewModel.onUiEvent(UiEvents.SeekToNext) }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
-    }
-}
-
-@Composable
-fun PlayerProgressBar(viewModel: AudioViewModel) {
-    var sliderPosition by remember { mutableFloatStateOf(viewModel.progress / 100f) }
-    var isSeeking by remember { mutableStateOf(false) }
-
-    LaunchedEffect(viewModel.progress) {
-        if (!isSeeking) {
-            sliderPosition = viewModel.progress / 100f
-        }
-    }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Slider(
-            value = sliderPosition,
-            onValueChange = { newPosition ->
-                isSeeking = true
-                sliderPosition = newPosition
-            },
-            onValueChangeFinished = {
-                viewModel.onUiEvent(UiEvents.SeekTo(sliderPosition))
-                isSeeking = false
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = if (isSeeking) {
-                    // Fixed calculation for predicted time
-                    timeStampToDuration((sliderPosition * viewModel.duration).toDouble())
-                } else {
-                    viewModel.progressString
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-
-            Text(
-                text = timeStampToDuration(viewModel.currentSelectedAudio.length),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
         }
     }
 }

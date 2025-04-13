@@ -56,6 +56,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.song.Song
+import com.bartosboth.rollen_android.ui.components.AppTopBar
+import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
+import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -63,140 +66,6 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 
 
-@Composable
-fun BottomBar(
-    progress: Float,
-    audio: Song,
-    isAudioPlaying: Boolean,
-    onStart: () -> Unit,
-    onClick: () -> Unit
-) {
-    BottomAppBar(
-        modifier = Modifier.clickable { onClick() },
-        content = {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(convertBase64ToByteArr(audio.coverBase64))
-                            .memoryCacheKey(audio.id.toString())
-                            .placeholderMemoryCacheKey(audio.id.toString())
-                            .build(),
-                        contentDescription = "Cover",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(56.dp)
-                    )
-                    ArtistInfo(
-                        audio = audio,
-                        modifier = Modifier.weight(1f),
-                    )
-                    AudioPlayer(
-                        isAudioPlaying = isAudioPlaying,
-                        onStart = onStart,
-                    )
-
-                }
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { progress / 100 })
-            }
-        }
-    )
-}
-
-@Composable
-fun PlayerIcon(
-    modifier: Modifier = Modifier,
-    icon: Int,
-    borderStroke: BorderStroke? = null,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    color: Color = MaterialTheme.colorScheme.onSurface,
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = CircleShape,
-        border = borderStroke,
-        modifier = modifier
-            .clip(CircleShape)
-            .clickable { onClick() },
-        contentColor = color,
-        color = backgroundColor
-    ) {
-        Box(
-            modifier = modifier.padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null
-            )
-
-        }
-    }
-
-}
-
-@Composable
-fun ArtistInfo(modifier: Modifier = Modifier, audio: Song) {
-    Log.d("ARTISTINFO", "ArtistInfo: ${audio.author} - ${audio.title}")
-    Row(
-        modifier = modifier.padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(
-                text = audio.title ?: "Unknown title",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                overflow = TextOverflow.Clip,
-                modifier = modifier.weight(1f),
-                maxLines = 1
-            )
-            //Spacer(modifier = modifier.size(1.dp))
-            Text(
-                text = audio.author ?: "Unknown artist",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = modifier.weight(1f),
-                softWrap = true,
-                overflow = TextOverflow.Clip,
-                maxLines = 1
-            )
-        }
-    }
-}
-
-@Composable
-fun AudioPlayer(
-    isAudioPlaying: Boolean,
-    onStart: () -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(56.dp)
-            .padding(4.dp)
-    ) {
-        PlayerIcon(
-            icon = if (isAudioPlaying) R.drawable.pause
-            else R.drawable.play_arrow,
-        ) {
-            onStart()
-        }
-    }
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     logoutViewModel: LogoutViewModel,
@@ -209,7 +78,6 @@ fun MainScreen(
     onItemClick: (Int) -> Unit,
     onNext: () -> Unit,
 ) {
-
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     if (showLogoutDialog) {
@@ -232,129 +100,32 @@ fun MainScreen(
             }
         )
     }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("RollenXd") },
-                actions = {
-                    IconButton(onClick = { showLogoutDialog = true }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Logout"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+            AppTopBar(
+                title = "RollenXd",
+                onLogoutClick = { showLogoutDialog = true }
             )
         },
         bottomBar = {
-            BottomBar(
+            MiniPlayerBar(
                 progress = progress,
-                isAudioPlaying = isAudioPlaying,
                 audio = currentPlayingAudio,
-                onStart = onStart,
-                onClick = { navController.navigate(PlayerScreen) }
+                isAudioPlaying = isAudioPlaying,
+                onPlayPauseClick = onStart,
+                onBarClick = { navController.navigate(PlayerScreen) }
             )
         }
-    ) {innerPadding ->
+    ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
             itemsIndexed(audioList) { index, song ->
-                AudioItem(audio = song, 
-                    isPlaying = song.id == currentPlayingAudio.id) {
-                    Log.d("LZYCLM_ID", "MainScreen: song clicked ${song.id}")
-                    onItemClick(index)
-                }
+                SongListItem(
+                    song = song,
+                    isPlaying = song.id == currentPlayingAudio.id,
+                    onClick = { onItemClick(index) }
+                )
             }
         }
     }
-}
-
-@Composable
-fun AudioItem(
-    audio: Song,
-    isPlaying: Boolean,
-    onItemClick: () -> Unit
-) {
-    val cardColor = if (isPlaying) CardColors(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        disabledContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface
-    ) else CardColors(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        disabledContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContentColor = MaterialTheme.colorScheme.onSurface,
-    )
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-            .clickable {
-                onItemClick()
-            },
-        colors = cardColor
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = audio.title ?: "Unknown title",
-                    style = MaterialTheme.typography.titleLarge,
-                    overflow = TextOverflow.Clip,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = audio.author ?: "Unknown artist",
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Clip
-                )
-
-            }
-            Log.d("TAG", "AudioItem: ${audio.length}")
-            Text(
-                text = timeStampToDuration(audio.length)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-        }
-
-    }
-}
-
-
-
-
-
-@Preview()
-@Composable
-fun HomeScreenPrev() {
-    BottomBar(
-        progress = 0.5f,
-        audio = Song(
-            title = "",
-            author = "",
-            coverBase64 = "",
-            length = 0.0,
-            isLiked = false,
-            reShares = 1,
-            id = 1L
-        ),
-        isAudioPlaying = true,
-        onStart = {  },
-        onClick = {  }
-    )
 }
