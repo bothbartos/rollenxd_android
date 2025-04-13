@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,8 +52,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.song.Song
+import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
+import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
+import com.bartosboth.rollen_android.utils.timeStampToDuration
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -58,13 +66,13 @@ import kotlin.math.roundToInt
 @Composable
 fun BottomBar(
     progress: Float,
-    onProgressChange: (Float) -> Unit,
     audio: Song,
     isAudioPlaying: Boolean,
     onStart: () -> Unit,
-    onNext: () -> Unit
+    onClick: () -> Unit
 ) {
     BottomAppBar(
+        modifier = Modifier.clickable { onClick() },
         content = {
             Column(
                 modifier = Modifier.padding(8.dp)
@@ -72,18 +80,28 @@ fun BottomBar(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(56.dp)
+                        .padding(3.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AudioPlayer(
-                        isAudioPlaying = isAudioPlaying,
-                        onStart = onStart,
-                        onNext = onNext
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(convertBase64ToByteArr(audio.coverBase64))
+                            .memoryCacheKey(audio.id.toString())
+                            .placeholderMemoryCacheKey(audio.id.toString())
+                            .build(),
+                        contentDescription = "Cover",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(56.dp)
                     )
                     ArtistInfo(
                         audio = audio,
                         modifier = Modifier.weight(1f),
+                    )
+                    AudioPlayer(
+                        isAudioPlaying = isAudioPlaying,
+                        onStart = onStart,
                     )
 
                 }
@@ -147,6 +165,9 @@ fun ArtistInfo(modifier: Modifier = Modifier, audio: Song) {
             Text(
                 text = audio.author ?: "Unknown artist",
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = modifier.weight(1f),
+                softWrap = true,
                 overflow = TextOverflow.Clip,
                 maxLines = 1
             )
@@ -158,7 +179,6 @@ fun ArtistInfo(modifier: Modifier = Modifier, audio: Song) {
 fun AudioPlayer(
     isAudioPlaying: Boolean,
     onStart: () -> Unit,
-    onNext: () -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -172,14 +192,6 @@ fun AudioPlayer(
         ) {
             onStart()
         }
-        Spacer(modifier = Modifier.size(8.dp))
-        Icon(
-            painter = painterResource(R.drawable.skip_next),
-            modifier = Modifier.clickable {
-                onNext()
-            },
-            contentDescription = "next"
-        )
     }
 
 }
@@ -190,7 +202,6 @@ fun MainScreen(
     logoutViewModel: LogoutViewModel,
     navController: NavController,
     progress: Float,
-    onProgressChange: (Float) -> Unit,
     isAudioPlaying: Boolean,
     currentPlayingAudio: Song,
     audioList: List<Song>,
@@ -243,11 +254,10 @@ fun MainScreen(
         bottomBar = {
             BottomBar(
                 progress = progress,
-                onProgressChange = onProgressChange,
                 isAudioPlaying = isAudioPlaying,
                 audio = currentPlayingAudio,
-                onNext = onNext,
-                onStart = onStart
+                onStart = onStart,
+                onClick = { navController.navigate(PlayerScreen) }
             )
         }
     ) {innerPadding ->
@@ -325,13 +335,7 @@ fun AudioItem(
     }
 }
 
-private fun timeStampToDuration(position: Double): String {
-    if (position < 0) return "--:--"
-    val totalSeconds = position.roundToInt()
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "%02d:%02d".format(minutes, seconds)
-}
+
 
 
 
@@ -340,17 +344,17 @@ private fun timeStampToDuration(position: Double): String {
 fun HomeScreenPrev() {
     BottomBar(
         progress = 0.5f,
-        onProgressChange = {},
         audio = Song(
-            uri = "".toUri(),
-            author = "Dr. Assman",
-            length = 10000.0,
-            title = "Song Two",
-            numberOfLikes = 1,
+            title = "",
+            author = "",
+            coverBase64 = "",
+            length = 0.0,
+            isLiked = false,
             reShares = 1,
-            id = 1
+            id = 1L
         ),
         isAudioPlaying = true,
         onStart = {  },
-    ) { }
+        onClick = {  }
+    )
 }

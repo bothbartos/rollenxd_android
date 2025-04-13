@@ -19,9 +19,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.AudioRepository
-import com.bartosboth.rollen_android.ui.screens.player.service.AudioState
-import com.bartosboth.rollen_android.ui.screens.player.service.PlayerEvent
-import com.bartosboth.rollen_android.ui.screens.player.service.SongServiceHandler
+import com.bartosboth.rollen_android.data.player.service.AudioState
+import com.bartosboth.rollen_android.data.player.service.PlayerEvent
+import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,13 +33,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private val audioDummy = Song(
-    uri = "".toUri(),
-    author = "",
-    length = 0.0,
     title = "",
-    numberOfLikes = 0,
+    author = "",
+    coverBase64 = "",
+    length = 0.0,
+    isLiked = false,
     reShares = 0,
-    id=2
+    id = 1L
 )
 
 @HiltViewModel
@@ -53,10 +53,13 @@ class AudioViewModel @Inject constructor(
     var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
     var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
-    var currentSelectedAudio by savedStateHandle.saveable {
+
+    private val _currentSelectedAudio =
         mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
-    }
-    var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Song>()) }
+    val currentSelectedAudio: Song get() = _currentSelectedAudio.value
+
+    private val _audioList = mutableStateOf<List<Song>>(emptyList())
+    val audioList: List<Song> get() = _audioList.value
 
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -70,7 +73,7 @@ class AudioViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val songs = repository.getAudioData()
-                audioList = songs
+                _audioList.value = songs
 
                 setMediaItems()
             } catch (e: Exception) {
@@ -105,7 +108,7 @@ class AudioViewModel @Inject constructor(
                 val selectedSong = audioList.find { it.id == songId }
                 Log.d("SELECTEDSONG", "playSong: selected song ${selectedSong?.id} ")
                 if (selectedSong != null) {
-                    currentSelectedAudio = selectedSong
+                    _currentSelectedAudio.value = selectedSong
                     songServiceHandler.playStreamingAudio(songId)
                 }
             } catch (e: Exception) {
@@ -126,10 +129,24 @@ class AudioViewModel @Inject constructor(
                     isPlaying = !isPlaying
                     Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                 }
-                is UiEvents.SeekTo -> songServiceHandler.onPlayerEvents(
-                    PlayerEvent.SeekTo,
-                    seekPosition = ((duration * uiEvents.position) / 100f).toLong()
-                )
+
+                is UiEvents.SeekTo -> {
+                    val seekPositionMs = (duration * uiEvents.position).toLong()
+                    Log.d(
+                        "SEEKING",
+                        "Seeking to position: $seekPositionMs ms (current progress: $progress)"
+                    )
+
+                    // Temporarily update UI progress for better responsiveness
+                    progress = uiEvents.position * 100f
+
+                    // Perform the actual seek
+                    songServiceHandler.onPlayerEvents(
+                        PlayerEvent.SeekTo,
+                        seekPosition = seekPositionMs
+                    )
+                }
+
                 is UiEvents.SelectedAudioChange -> playSong(audioList[uiEvents.index].id)
                 is UiEvents.UpdateProgress -> progress = uiEvents.newProgress
             }
@@ -145,15 +162,17 @@ class AudioViewModel @Inject constructor(
                     is AudioState.Current -> {
                         audioState.songId?.let { id ->
                             audioList.find { it.id == id }?.let { song ->
-                                currentSelectedAudio = song
+                                _currentSelectedAudio.value = song
                                 Log.d("CURRENT_SONG", "Updated to: ${song.title} by ${song.author}")
                             }
                         }
                     }
+
                     is AudioState.Playing -> {
                         isPlaying = audioState.isPlaying
                         Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                     }
+
                     is AudioState.Progress -> calculateProgressValue(audioState.progress)
                     is AudioState.Ready -> {
                         duration = audioState.duration
@@ -171,6 +190,32 @@ class AudioViewModel @Inject constructor(
         progressString = formatDuration(currentProgress)
     }
 
+    fun likeSong(id: Long) {
+        viewModelScope.launch {
+            try {
+                if(repository.likeSong(id) == 200) _currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = true)
+                _audioList.value = _audioList.value.map { song ->
+                    if (song.id == id) song.copy(isLiked = true) else song
+                }
+            } catch (e: Exception) {
+                Log.d("LIKE ERROR", "LIKE ERROR: ${e.message}")
+            }
+        }
+    }
+
+    fun unlikeSong(id: Long) {
+        viewModelScope.launch {
+            try {
+                if(repository.unlikeSong(id) == 200)_currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = false)
+                _audioList.value = _audioList.value.map { song ->
+                    if (song.id == id) song.copy(isLiked = false) else song
+                }
+            } catch (e: Exception) {
+                Log.d("UNLIKE ERROR", "UNLIKE ERROR: ${e.message}")
+            }
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     private fun formatDuration(currentProgress: Long): String {
         val minutes = TimeUnit.MILLISECONDS.toMinutes(currentProgress)
@@ -179,7 +224,6 @@ class AudioViewModel @Inject constructor(
         return String.format("%02d:%02d", minutes, seconds)
     }
 }
-
 
 
 sealed class UiState {

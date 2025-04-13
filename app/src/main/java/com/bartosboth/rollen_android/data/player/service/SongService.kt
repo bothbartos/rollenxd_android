@@ -1,10 +1,10 @@
-package com.bartosboth.rollen_android.ui.screens.player.service
+package com.bartosboth.rollen_android.data.player.service
 
 import android.content.Intent
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.bartosboth.rollen_android.ui.screens.player.notification.NotificationManager
+import com.bartosboth.rollen_android.data.player.notification.NotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

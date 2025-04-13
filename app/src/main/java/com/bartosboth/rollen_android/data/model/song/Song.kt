@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Song(
-    val uri: Uri,
-    val author: String?,
+    val title: String,
+    val author: String,
+    val coverBase64: String,
     val length: Double,
-    val title: String?,
-    val numberOfLikes: Int,
+    var isLiked: Boolean,
     val reShares: Int,
     val id: Long
     ): Parcelable

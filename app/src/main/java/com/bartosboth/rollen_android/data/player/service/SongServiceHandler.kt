@@ -1,11 +1,18 @@
-package com.bartosboth.rollen_android.ui.screens.player.service
+package com.bartosboth.rollen_android.data.player.service
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.extractor.DefaultExtractorsFactory
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -40,12 +47,16 @@ class SongServiceHandler @Inject constructor(
         exoPlayer.prepare()
     }
 
+    @OptIn(UnstableApi::class)
     fun playStreamingAudio(songId: Long) {
         try {
             val audioUri = Uri.parse("http://${Constants.BASE_URL}/api/song/stream/$songId")
             Log.d("SongServiceHandler", "Attempting to stream from: $audioUri")
-            val mediaItem = MediaItem.fromUri(audioUri)
-            exoPlayer.setMediaItem(mediaItem)
+
+            val dataSourceFactory = DefaultDataSource.Factory(context)
+            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(audioUri))
+            exoPlayer.setMediaSource(mediaSource)
             exoPlayer.prepare()
             exoPlayer.play()
         } catch (e: Exception) {
@@ -53,6 +64,7 @@ class SongServiceHandler @Inject constructor(
         }
     }
 
+    @OptIn(UnstableApi::class)
     suspend fun onPlayerEvents(
         playerEvent: PlayerEvent,
         selectedAudioIndex: Int = -1,
@@ -63,7 +75,34 @@ class SongServiceHandler @Inject constructor(
             PlayerEvent.Forward -> exoPlayer.seekForward()
             PlayerEvent.SeekToNext -> exoPlayer.seekToNextMediaItem()
             PlayerEvent.PlayPause -> playOrPause()
-            PlayerEvent.SeekTo -> exoPlayer.seekTo(seekPosition)
+            PlayerEvent.SeekTo -> {
+                Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
+                val wasPlaying = exoPlayer.isPlaying
+                val currentPosition = exoPlayer.currentPosition
+                val isSeekingBackward = seekPosition < currentPosition
+
+                Log.d("SongServiceHandler", "Current position: $currentPosition, Seeking ${if(isSeekingBackward) "backward" else "forward"}")
+
+                try {
+                    if (isSeekingBackward) {
+                        val playWhenReady = exoPlayer.playWhenReady
+                        exoPlayer.playWhenReady = false
+
+                        exoPlayer.seekTo(seekPosition)
+
+                        delay(200)
+
+                        exoPlayer.playWhenReady = playWhenReady
+                    } else {
+                        exoPlayer.seekTo(seekPosition)
+                    }
+                } catch (e: Exception) {
+                    Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
+
+                    exoPlayer.seekTo(seekPosition)
+                }
+                _audioState.value = AudioState.Progress(seekPosition)
+            }
             PlayerEvent.SelectedAudioChange -> {
                 if (selectedAudioIndex != -1) {
                     exoPlayer.seekToDefaultPosition(selectedAudioIndex)
@@ -72,9 +111,6 @@ class SongServiceHandler @Inject constructor(
             }
 
             PlayerEvent.Stop -> exoPlayer.stop()
-            is PlayerEvent.UpdateProgress -> {
-                exoPlayer.seekTo((exoPlayer.duration * playerEvent.newProgress).toLong())
-            }
         }
     }
 
@@ -174,5 +210,4 @@ sealed class PlayerEvent {
     object Forward : PlayerEvent()
     object SeekTo : PlayerEvent()
     object Stop : PlayerEvent()
-    data class UpdateProgress(val newProgress: Float) : PlayerEvent()
 }
