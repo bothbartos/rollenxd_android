@@ -5,6 +5,9 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
@@ -41,12 +44,24 @@ object AppModule {
     @Singleton
     fun provideExoPlayer(
         @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes
-    ): ExoPlayer = ExoPlayer.Builder(context)
-        .setAudioAttributes(audioAttributes, true)
-        .setHandleAudioBecomingNoisy(true)
-        .setTrackSelector(DefaultTrackSelector(context))
-        .build()
+        audioAttributes: AudioAttributes,
+        dataSourceFactory: DefaultDataSource.Factory
+    ): ExoPlayer {
+        return ExoPlayer.Builder(context)
+            .setAudioAttributes(audioAttributes, true)
+            .setHandleAudioBecomingNoisy(true)
+            .setLoadControl(
+                DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(
+                        DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * 2,
+                        DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * 2,
+                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
+                        DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+                    )
+                    .build()
+            )
+            .build()
+    }
 
     @Provides
     @Singleton
@@ -86,6 +101,25 @@ object AppModule {
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
+
+    @OptIn(UnstableApi::class)
+    @Provides
+    @Singleton
+    fun provideDataSourceFactory(
+        @ApplicationContext context: Context,
+        okHttpClient: OkHttpClient
+    ): DefaultDataSource.Factory {
+        val httpDataSourceFactory = OkHttpDataSource
+            .Factory(okHttpClient)
+            .setDefaultRequestProperties(mapOf(
+                "Accept" to "*/*",
+                "Accept-Encoding" to "identity",  // Important for seeking
+                "Connection" to "keep-alive"
+            ))
+
+        return DefaultDataSource.Factory(context, httpDataSourceFactory)
+    }
+
 
     @Provides
     @Singleton

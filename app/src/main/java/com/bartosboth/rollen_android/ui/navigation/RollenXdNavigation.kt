@@ -79,7 +79,6 @@ fun RollenXdNavigation() {
                 logoutViewModel = logoutViewModel,
                 navController = navController,
                 progress = audioViewModel.progress,
-                onProgressChange = { audioViewModel.onUiEvent(UiEvents.UpdateProgress(it)) },
                 isAudioPlaying = audioViewModel.isPlaying,
                 currentPlayingAudio = audioViewModel.currentSelectedAudio,
                 audioList = audioViewModel.audioList,

@@ -20,10 +20,10 @@ class AudioRepository @Inject constructor(
     }
 
     suspend fun likeSong(id: Long): Int = withContext(Dispatchers.IO) {
-        songApi.likeSong(id).code()!!
+        songApi.likeSong(id).code()
     }
 
     suspend fun unlikeSong(id: Long): Int = withContext(Dispatchers.IO) {
-        songApi.unlikeSong(id).code()!!
+        songApi.unlikeSong(id).code()
     }
 }

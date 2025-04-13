@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -46,12 +47,16 @@ class SongServiceHandler @Inject constructor(
         exoPlayer.prepare()
     }
 
+    @OptIn(UnstableApi::class)
     fun playStreamingAudio(songId: Long) {
         try {
             val audioUri = Uri.parse("http://${Constants.BASE_URL}/api/song/stream/$songId")
             Log.d("SongServiceHandler", "Attempting to stream from: $audioUri")
-            val mediaItem = MediaItem.fromUri(audioUri)
-            exoPlayer.setMediaItem(mediaItem)
+
+            val dataSourceFactory = DefaultDataSource.Factory(context)
+            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(audioUri))
+            exoPlayer.setMediaSource(mediaSource)
             exoPlayer.prepare()
             exoPlayer.play()
         } catch (e: Exception) {
@@ -59,6 +64,7 @@ class SongServiceHandler @Inject constructor(
         }
     }
 
+    @OptIn(UnstableApi::class)
     suspend fun onPlayerEvents(
         playerEvent: PlayerEvent,
         selectedAudioIndex: Int = -1,
@@ -71,8 +77,6 @@ class SongServiceHandler @Inject constructor(
             PlayerEvent.PlayPause -> playOrPause()
             PlayerEvent.SeekTo -> {
                 Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
-
-                // Save the playing state
                 val wasPlaying = exoPlayer.isPlaying
                 val currentPosition = exoPlayer.currentPosition
                 val isSeekingBackward = seekPosition < currentPosition
@@ -80,24 +84,23 @@ class SongServiceHandler @Inject constructor(
                 Log.d("SongServiceHandler", "Current position: $currentPosition, Seeking ${if(isSeekingBackward) "backward" else "forward"}")
 
                 try {
-                    // Disable playWhenReady temporarily to prevent auto-restart
-                    exoPlayer.playWhenReady = false
+                    if (isSeekingBackward) {
+                        val playWhenReady = exoPlayer.playWhenReady
+                        exoPlayer.playWhenReady = false
 
-                    // Perform the seek operation
-                    exoPlayer.seekTo(seekPosition)
+                        exoPlayer.seekTo(seekPosition)
 
-                    // Wait a moment for the seek to complete
-                    delay(100)
+                        delay(200)
 
-                    // Restore playing state
-                    if (wasPlaying) {
-                        exoPlayer.playWhenReady = true
+                        exoPlayer.playWhenReady = playWhenReady
+                    } else {
+                        exoPlayer.seekTo(seekPosition)
                     }
                 } catch (e: Exception) {
                     Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
-                }
 
-                // Update the progress state
+                    exoPlayer.seekTo(seekPosition)
+                }
                 _audioState.value = AudioState.Progress(seekPosition)
             }
             PlayerEvent.SelectedAudioChange -> {
@@ -108,9 +111,6 @@ class SongServiceHandler @Inject constructor(
             }
 
             PlayerEvent.Stop -> exoPlayer.stop()
-            is PlayerEvent.UpdateProgress -> {
-                exoPlayer.seekTo((exoPlayer.duration * playerEvent.newProgress).toLong())
-            }
         }
     }
 
@@ -210,5 +210,4 @@ sealed class PlayerEvent {
     object Forward : PlayerEvent()
     object SeekTo : PlayerEvent()
     object Stop : PlayerEvent()
-    data class UpdateProgress(val newProgress: Float) : PlayerEvent()
 }

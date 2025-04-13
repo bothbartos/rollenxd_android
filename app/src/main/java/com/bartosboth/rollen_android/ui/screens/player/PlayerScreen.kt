@@ -1,6 +1,5 @@
 package com.bartosboth.rollen_android.ui.screens.player
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,14 +64,14 @@ fun PlayerScreen(
                 .padding(innerPadding)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween // This will space children evenly
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top section with back button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
-                    .weight(0.5f), // Small weight for the top section
+                    .weight(0.5f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -94,7 +89,7 @@ fun PlayerScreen(
             // Middle section with album cover (give it more weight)
             Box(
                 modifier = Modifier
-                    .weight(4f) // Larger weight for the album cover
+                    .weight(4f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
@@ -120,7 +115,7 @@ fun PlayerScreen(
             // Bottom section with controls
             Column(
                 modifier = Modifier
-                    .weight(3f) // Good weight for controls section
+                    .weight(3f)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -175,15 +170,6 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Repeat button
-                    IconButton(onClick = { /* Handle repeat */ }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Refresh,
-                            contentDescription = "Repeat",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-
                     // Previous button
                     IconButton(
                         onClick = { viewModel.onUiEvent(UiEvents.Backward) },
@@ -225,18 +211,8 @@ fun PlayerScreen(
                             modifier = Modifier.size(36.dp)
                         )
                     }
-
-                    // Repeat button
-                    IconButton(onClick = { /* Handle repeat */ }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Refresh,
-                            contentDescription = "Repeat",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
                 }
 
-                // Add some bottom padding to prevent controls from being too close to the edge
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
