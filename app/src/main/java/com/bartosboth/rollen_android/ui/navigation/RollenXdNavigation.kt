@@ -84,7 +84,11 @@ fun RollenXdNavigation() {
                 audioList = audioViewModel.audioList,
                 onItemClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
-                onNext = { audioViewModel.onUiEvent(UiEvents.SeekToNext) }
+                onLike = { if (audioViewModel.currentSelectedAudio.isLiked) {
+                    audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
+                } else {
+                    audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
+                }}
             )
         }
 

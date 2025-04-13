@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -76,7 +77,7 @@ fun MainScreen(
     audioList: List<Song>,
     onStart: () -> Unit,
     onItemClick: (Int) -> Unit,
-    onNext: () -> Unit,
+    onLike: (Long) -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -114,17 +115,26 @@ fun MainScreen(
                 audio = currentPlayingAudio,
                 isAudioPlaying = isAudioPlaying,
                 onPlayPauseClick = onStart,
+                onLike = onLike,
                 onBarClick = { navController.navigate(PlayerScreen) }
             )
         }
     ) { innerPadding ->
-        LazyColumn(contentPadding = innerPadding) {
-            itemsIndexed(audioList) { index, song ->
-                SongListItem(
-                    song = song,
-                    isPlaying = song.id == currentPlayingAudio.id,
-                    onClick = { onItemClick(index) }
-                )
+        Column(modifier = Modifier.padding(innerPadding)){
+            Text(
+                text = "Songs:",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 7.dp, top = 4.dp)
+            )
+            LazyRow {
+                itemsIndexed(audioList) { index, song ->
+                    SongListItem(
+                        song = song,
+                        isPlaying = song.id == currentPlayingAudio.id,
+                        onClick = { onItemClick(index) }
+                    )
+                }
             }
         }
     }

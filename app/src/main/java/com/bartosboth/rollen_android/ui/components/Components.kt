@@ -28,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -175,7 +176,8 @@ fun MiniPlayerBar(
     audio: Song,
     isAudioPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
-    onBarClick: () -> Unit
+    onBarClick: () -> Unit,
+    onLike: (Long) -> Unit
 ) {
     BottomAppBar(
         modifier = Modifier.clickable { onBarClick() },
@@ -202,6 +204,8 @@ fun MiniPlayerBar(
                         artist = audio.author,
                         modifier = Modifier.weight(1f)
                     )
+
+                    LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
 
                     PlayPauseButton(
                         isPlaying = isAudioPlaying,
@@ -411,42 +415,43 @@ fun SongListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp)
+            .padding(7.dp)
             .clickable { onClick() },
         colors = cardColors
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.Start,  // Align everything to start
             modifier = Modifier.padding(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = song.title ?: "Unknown title",
-                    style = MaterialTheme.typography.titleLarge,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
+            // Cover image aligned to start
+            CoverImage(
+                coverBase64 = song.coverBase64,
+                songId = song.id,
+                size = 160.dp,
+                shadowElevation = 4.dp
+            )
 
-                Spacer(modifier = Modifier.size(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
-                Text(
-                    text = song.author ?: "Unknown artist",
-                    style = MaterialTheme.typography.bodySmall,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-            }
+            // Text content below the image, aligned to start
+            Text(
+                text = song.title ?: "Unknown title",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
 
-            Text(text = timeStampToDuration(song.length))
-            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = song.author ?: "Unknown artist",
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
         }
     }
 }
+
 
 @Composable
 fun LikeButton(
