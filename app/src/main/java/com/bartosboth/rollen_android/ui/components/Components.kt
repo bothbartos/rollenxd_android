@@ -1,8 +1,10 @@
 package com.bartosboth.rollen_android.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -66,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
+import com.bartosboth.rollen_android.data.model.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -402,10 +406,11 @@ fun MiniPlayerBar(
     onLike: (Long) -> Unit,
     onHomeClick: () -> Unit,
     onSearchClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    userDetail: UserDetail
 ) {
     BottomAppBar(
-        modifier = Modifier.clickable { onBarClick() }.height(150.dp),
+        modifier = Modifier.height(150.dp),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
             Column(
@@ -415,7 +420,8 @@ fun MiniPlayerBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .padding(3.dp),
+                        .padding(3.dp)
+                        .clickable { onBarClick() },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -465,16 +471,48 @@ fun MiniPlayerBar(
                         )
                     }
 
-                    IconButton(onClick = onProfileClick) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Profile"
-                        )
-                    }
+                    CircularBase64ImageButton(
+                        userDetail = userDetail,
+                        onClick = onProfileClick,
+                        contentDescription = "Profile",
+                        size = 30.dp
+
+                    )
                 }
             }
         }
     )
+}
+
+@Composable
+fun CircularBase64ImageButton(
+    userDetail: UserDetail,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    size: Dp = 56.dp,
+    borderWidth: Dp = 0.dp,
+    borderColor: Color = Color.Transparent
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .border(borderWidth, borderColor, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(convertBase64ToByteArr(userDetail.profileImageBase64))
+                .memoryCacheKey(userDetail.id.toString())
+                .placeholderMemoryCacheKey(userDetail.id.toString())
+                .build(),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }
 
 
@@ -522,6 +560,14 @@ fun BottomBarPreview(){
         onLike = { },
         onHomeClick = {},
         onSearchClick = {  },
-        onProfileClick = {}
+        onProfileClick = {},
+        userDetail = UserDetail(
+            id = 1L,
+            name = "username",
+            bio = "bio",
+            profileImageBase64 = "",
+            email = "email",
+            songs = emptyList()
+        )
     )
 }

@@ -1,13 +1,9 @@
 package com.bartosboth.rollen_android.data.di
 
 import android.content.Context
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.network.AuthInterceptor
-import com.bartosboth.rollen_android.data.network.AuthService
+import com.bartosboth.rollen_android.data.network.AuthAPI
 import com.bartosboth.rollen_android.data.network.SongAPI
 import com.bartosboth.rollen_android.data.network.UserDetailAPI
 import com.bartosboth.rollen_android.utils.Constants
@@ -42,23 +38,7 @@ object NetworkModule {
             .build()
     }
 
-    @OptIn(UnstableApi::class)
-    @Provides
-    @Singleton
-    fun provideDataSourceFactory(
-        @ApplicationContext context: Context,
-        okHttpClient: OkHttpClient
-    ): DefaultDataSource.Factory {
-        val httpDataSourceFactory = OkHttpDataSource
-            .Factory(okHttpClient)
-            .setDefaultRequestProperties(mapOf(
-                "Accept" to "*/*",
-                "Accept-Encoding" to "identity",
-                "Connection" to "keep-alive"
-            ))
 
-        return DefaultDataSource.Factory(context, httpDataSourceFactory)
-    }
 
 
     @Provides
@@ -74,22 +54,22 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthService(okHttpClient: OkHttpClient): AuthService {
+    fun provideAuthAPI(okHttpClient: OkHttpClient): AuthAPI {
         return Retrofit.Builder()
             .baseUrl("http://${Constants.BASE_URL}/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
-            .create(AuthService::class.java)
+            .create(AuthAPI::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideUserDetailAPI(): UserDetailAPI{
+    fun provideUserDetailAPI(okHttpClient: OkHttpClient): UserDetailAPI{
         return Retrofit.Builder()
             .baseUrl("http://${Constants.BASE_URL}/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient())
+            .client(okHttpClient)
             .build()
             .create(UserDetailAPI::class.java)
     }

@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,7 @@ import kotlin.math.roundToInt
 @Composable
 fun MainScreen(
     logoutViewModel: LogoutViewModel,
+    userDetailViewModel: UserDetailViewModel,
     navController: NavController,
     progress: Float,
     isAudioPlaying: Boolean,
@@ -107,21 +109,24 @@ fun MainScreen(
         topBar = {
             AppTopBar(
                 title = "RollenXd",
-                onLogoutClick = { showLogoutDialog = true }
+                onLogoutClick = { showLogoutDialog = true },
             )
         },
         bottomBar = {
-            MiniPlayerBar(
-                progress = progress,
-                audio = currentPlayingAudio,
-                isAudioPlaying = isAudioPlaying,
-                onPlayPauseClick = onStart,
-                onLike = onLike,
-                onHomeClick = { navController.navigate(MainScreen) },
-                onSearchClick = {  },
-                onProfileClick = { },
-                onBarClick = { navController.navigate(PlayerScreen) }
-            )
+            userDetailViewModel.userDetails.collectAsState().value?.let {
+                MiniPlayerBar(
+                    progress = progress,
+                    audio = currentPlayingAudio,
+                    isAudioPlaying = isAudioPlaying,
+                    onPlayPauseClick = onStart,
+                    onLike = onLike,
+                    onHomeClick = { navController.navigate(MainScreen) },
+                    onSearchClick = {  },
+                    onProfileClick = { },
+                    onBarClick = { navController.navigate(PlayerScreen) },
+                    userDetail = it
+                )
+            }
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)){

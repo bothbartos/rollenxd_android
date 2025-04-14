@@ -2,9 +2,6 @@ package com.bartosboth.rollen_android.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bartosboth.rollen_android.data.manager.TokenManager
-import com.bartosboth.rollen_android.data.model.auth.LoginRequest
-import com.bartosboth.rollen_android.data.network.AuthService
 import com.bartosboth.rollen_android.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

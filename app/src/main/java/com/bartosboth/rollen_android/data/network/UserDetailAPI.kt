@@ -8,6 +8,6 @@ import javax.inject.Singleton
 @Singleton
 interface UserDetailAPI {
 
-    @GET("/api/user/details")
+    @GET("api/user/details")
     suspend fun getUserDetails(): Response<UserDetail>
 }

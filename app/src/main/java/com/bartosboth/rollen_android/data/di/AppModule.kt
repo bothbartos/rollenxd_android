@@ -6,27 +6,16 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
-import com.bartosboth.rollen_android.data.manager.TokenManager
-import com.bartosboth.rollen_android.data.network.AuthInterceptor
-import com.bartosboth.rollen_android.data.network.AuthService
-import com.bartosboth.rollen_android.data.network.SongAPI
 import com.bartosboth.rollen_android.data.player.notification.NotificationManager
 import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
-import com.bartosboth.rollen_android.utils.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -45,7 +34,6 @@ object AppModule {
     fun provideExoPlayer(
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes,
-        dataSourceFactory: DefaultDataSource.Factory
     ): ExoPlayer {
         return ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)

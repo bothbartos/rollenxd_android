@@ -4,13 +4,12 @@ import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.model.auth.LoginRequest
 import com.bartosboth.rollen_android.data.model.auth.LoginResponse
 import com.bartosboth.rollen_android.data.model.auth.RegisterRequest
-import com.bartosboth.rollen_android.data.network.AuthService
-import com.bartosboth.rollen_android.ui.screens.login.LoginState
+import com.bartosboth.rollen_android.data.network.AuthAPI
 import javax.inject.Inject
 
 
 class AuthRepository @Inject constructor(
-    private val authService: AuthService,
+    private val authService: AuthAPI,
     private val tokenManager: TokenManager
 ) {
     suspend fun login(username: String, password: String): LoginResponse {
