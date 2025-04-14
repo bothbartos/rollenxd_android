@@ -18,6 +18,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -57,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -90,7 +94,7 @@ fun CustomTextField(
             onNext = { onImeAction() },
             onDone = { onImeAction() }
         ),
-        singleLine = true,  // This prevents multi-line input
+        singleLine = true,
         modifier = modifier.fillMaxWidth()
     )
 }
@@ -144,82 +148,6 @@ fun ScreenContainer(content: @Composable () -> Unit) {
             content()
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopBar(
-    title: String,
-    onLogoutClick: () -> Unit
-) {
-    TopAppBar(
-        title = { Text(title) },
-        actions = {
-            IconButton(onClick = onLogoutClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout"
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    )
-}
-
-@Composable
-fun MiniPlayerBar(
-    progress: Float,
-    audio: Song,
-    isAudioPlaying: Boolean,
-    onPlayPauseClick: () -> Unit,
-    onBarClick: () -> Unit,
-    onLike: (Long) -> Unit
-) {
-    BottomAppBar(
-        modifier = Modifier.clickable { onBarClick() },
-        content = {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CoverImage(
-                        coverBase64 = audio.coverBase64,
-                        songId = audio.id,
-                        size = 53.dp
-                    )
-
-                    SongInfo(
-                        title = audio.title,
-                        artist = audio.author,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
-
-                    PlayPauseButton(
-                        isPlaying = isAudioPlaying,
-                        onClick = onPlayPauseClick
-                    )
-                }
-
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { progress / 100 }
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -420,10 +348,9 @@ fun SongListItem(
         colors = cardColors
     ) {
         Column(
-            horizontalAlignment = Alignment.Start,  // Align everything to start
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(8.dp)
         ) {
-            // Cover image aligned to start
             CoverImage(
                 coverBase64 = song.coverBase64,
                 songId = song.id,
@@ -433,7 +360,6 @@ fun SongListItem(
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            // Text content below the image, aligned to start
             Text(
                 text = song.title ?: "Unknown title",
                 style = MaterialTheme.typography.titleMedium,
@@ -452,7 +378,6 @@ fun SongListItem(
     }
 }
 
-
 @Composable
 fun LikeButton(
     isLiked: Boolean,
@@ -465,4 +390,138 @@ fun LikeButton(
             tint = MaterialTheme.colorScheme.primary
         )
     }
+}
+
+@Composable
+fun MiniPlayerBar(
+    progress: Float,
+    audio: Song,
+    isAudioPlaying: Boolean,
+    onPlayPauseClick: () -> Unit,
+    onBarClick: () -> Unit,
+    onLike: (Long) -> Unit,
+    onHomeClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    BottomAppBar(
+        modifier = Modifier.clickable { onBarClick() }.height(150.dp),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        content = {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CoverImage(
+                        coverBase64 = audio.coverBase64,
+                        songId = audio.id,
+                        size = 53.dp
+                    )
+
+                    SongInfo(
+                        title = audio.title,
+                        artist = audio.author,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
+
+                    PlayPauseButton(
+                        isPlaying = isAudioPlaying,
+                        onClick = onPlayPauseClick
+                    )
+                }
+
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    progress = { progress / 100 }
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ){
+                    IconButton(onClick = onHomeClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Home"
+                        )
+                    }
+
+                    IconButton(onClick = onSearchClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search"
+                        )
+                    }
+
+                    IconButton(onClick = onProfileClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "Profile"
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopBar(
+    title: String,
+    onLogoutClick: () -> Unit
+) {
+    TopAppBar(
+        title = { Text(title) },
+        actions = {
+            IconButton(onClick = onLogoutClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = "Logout"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
+}
+
+@Preview
+@Composable
+fun BottomBarPreview(){
+    MiniPlayerBar(
+        progress = 1.0f,
+        audio = Song(
+            title = "Title",
+            author = "Author",
+            coverBase64 = "",
+            length = 100.0,
+            isLiked = false,
+            reShares = 0,
+            id = 1L
+        ),
+        isAudioPlaying = true,
+        onPlayPauseClick = {  },
+        onBarClick = {  },
+        onLike = { },
+        onHomeClick = {},
+        onSearchClick = {  },
+        onProfileClick = {}
+    )
 }

@@ -60,6 +60,7 @@ import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.SongListItem
+import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -116,6 +117,9 @@ fun MainScreen(
                 isAudioPlaying = isAudioPlaying,
                 onPlayPauseClick = onStart,
                 onLike = onLike,
+                onHomeClick = { navController.navigate(MainScreen) },
+                onSearchClick = {  },
+                onProfileClick = { },
                 onBarClick = { navController.navigate(PlayerScreen) }
             )
         }

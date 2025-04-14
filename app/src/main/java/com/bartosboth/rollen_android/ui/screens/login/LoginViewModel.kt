@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.model.auth.LoginRequest
 import com.bartosboth.rollen_android.data.network.AuthService
+import com.bartosboth.rollen_android.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authService: AuthService,
-    private val tokenManager: TokenManager
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
@@ -25,23 +25,12 @@ class LoginViewModel @Inject constructor(
             try {
                 _loginState.value = LoginState.Loading
 
-                val response = authService.login(LoginRequest(username, password))
-
-                if (response.isSuccessful) {
-                    response.body()?.let { loginResponse ->
-                        // Save tokens securely
-                        tokenManager.saveAccessToken(
-                            loginResponse.jwtSecret,
-                        )
+                val response = authRepository.login(username, password)
+                    response.let {
                         _loginState.value = LoginState.Success
-                    } ?: run {
-                        _loginState.value = LoginState.Error("Empty response body")
                     }
-                } else {
-                    _loginState.value = LoginState.Error("Login failed: ${response.message()}")
-                }
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error("Network error: ${e.message}")
+                _loginState.value = LoginState.Error("Login error: ${e.message}")
             }
         }
     }
