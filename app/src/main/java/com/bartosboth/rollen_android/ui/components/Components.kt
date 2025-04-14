@@ -1,5 +1,6 @@
 package com.bartosboth.rollen_android.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -502,6 +503,7 @@ fun CircularBase64ImageButton(
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent
 ) {
+    Log.d("BASE64", "CircularBase64ImageButton: ${userDetail.profileImageBase64}")
     Box(
         modifier = modifier
             .size(size)
@@ -513,8 +515,8 @@ fun CircularBase64ImageButton(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(convertBase64ToByteArr(userDetail.profileImageBase64))
-                .memoryCacheKey(userDetail.id.toString())
-                .placeholderMemoryCacheKey(userDetail.id.toString())
+                .memoryCacheKey(userDetail.name.toString())
+                .placeholderMemoryCacheKey(userDetail.name.toString())
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
@@ -538,8 +540,8 @@ fun AppTopBar(
             }
                 },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
     )
 }
