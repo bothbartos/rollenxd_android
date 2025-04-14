@@ -3,7 +3,7 @@ package com.bartosboth.rollen_android.ui.screens.register
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.bartosboth.rollen_android.data.model.auth.RegisterRequest
-import com.bartosboth.rollen_android.data.network.AuthService
+import com.bartosboth.rollen_android.data.network.AuthAPI
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val authService: AuthService
+    private val authService: AuthAPI
 ): ViewModel() {
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val registerState: StateFlow<RegisterState> = _registerState

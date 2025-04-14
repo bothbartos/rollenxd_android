@@ -1,8 +1,10 @@
 package com.bartosboth.rollen_android.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -28,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -44,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -56,11 +63,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
+import com.bartosboth.rollen_android.data.model.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -89,7 +98,7 @@ fun CustomTextField(
             onNext = { onImeAction() },
             onDone = { onImeAction() }
         ),
-        singleLine = true,  // This prevents multi-line input
+        singleLine = true,
         modifier = modifier.fillMaxWidth()
     )
 }
@@ -143,79 +152,6 @@ fun ScreenContainer(content: @Composable () -> Unit) {
             content()
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopBar(
-    title: String,
-    onLogoutClick: () -> Unit
-) {
-    TopAppBar(
-        title = { Text(title) },
-        actions = {
-            IconButton(onClick = onLogoutClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout"
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    )
-}
-
-@Composable
-fun MiniPlayerBar(
-    progress: Float,
-    audio: Song,
-    isAudioPlaying: Boolean,
-    onPlayPauseClick: () -> Unit,
-    onBarClick: () -> Unit
-) {
-    BottomAppBar(
-        modifier = Modifier.clickable { onBarClick() },
-        content = {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CoverImage(
-                        coverBase64 = audio.coverBase64,
-                        songId = audio.id,
-                        size = 53.dp
-                    )
-
-                    SongInfo(
-                        title = audio.title,
-                        artist = audio.author,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    PlayPauseButton(
-                        isPlaying = isAudioPlaying,
-                        onClick = onPlayPauseClick
-                    )
-                }
-
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { progress / 100 }
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -411,39 +347,37 @@ fun SongListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp)
+            .padding(7.dp)
             .clickable { onClick() },
         colors = cardColors
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = song.title ?: "Unknown title",
-                    style = MaterialTheme.typography.titleLarge,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
+            CoverImage(
+                coverBase64 = song.coverBase64,
+                songId = song.id,
+                size = 160.dp,
+                shadowElevation = 4.dp
+            )
 
-                Spacer(modifier = Modifier.size(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
-                Text(
-                    text = song.author ?: "Unknown artist",
-                    style = MaterialTheme.typography.bodySmall,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-            }
+            Text(
+                text = song.title ?: "Unknown title",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
 
-            Text(text = timeStampToDuration(song.length))
-            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = song.author ?: "Unknown artist",
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
         }
     }
 }
@@ -460,4 +394,184 @@ fun LikeButton(
             tint = MaterialTheme.colorScheme.primary
         )
     }
+}
+
+@Composable
+fun MiniPlayerBar(
+    progress: Float,
+    audio: Song,
+    isAudioPlaying: Boolean,
+    onPlayPauseClick: () -> Unit,
+    onBarClick: () -> Unit,
+    onLike: (Long) -> Unit,
+    onHomeClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    userDetail: UserDetail
+) {
+    BottomAppBar(
+        modifier = Modifier.height(150.dp),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        content = {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(3.dp)
+                        .clickable { onBarClick() },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CoverImage(
+                        coverBase64 = audio.coverBase64,
+                        songId = audio.id,
+                        size = 53.dp
+                    )
+
+                    SongInfo(
+                        title = audio.title,
+                        artist = audio.author,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
+
+                    PlayPauseButton(
+                        isPlaying = isAudioPlaying,
+                        onClick = onPlayPauseClick
+                    )
+                }
+
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    progress = { progress / 100 }
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ){
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center) {
+                        IconButton(onClick = onHomeClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = "Home"
+                            )
+                        }
+                    }
+
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center) {
+                        IconButton(onClick = onSearchClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "Search"
+                            )
+                        }
+                    }
+
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center){
+                        CircularBase64ImageButton(
+                            userDetail = userDetail,
+                            onClick = onProfileClick,
+                            contentDescription = "Profile",
+                            size = 30.dp
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun CircularBase64ImageButton(
+    userDetail: UserDetail,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    size: Dp = 56.dp,
+    borderWidth: Dp = 0.dp,
+    borderColor: Color = Color.Transparent
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .border(borderWidth, borderColor, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(convertBase64ToByteArr(userDetail.profileImageBase64))
+                .memoryCacheKey(userDetail.id.toString())
+                .placeholderMemoryCacheKey(userDetail.id.toString())
+                .build(),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopBar(
+    title: String,
+    onLogoutClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Icon(painter = painterResource(R.drawable.rollenxdicon), contentDescription = "Rollenxd")
+                Text(title)
+            }
+                },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        )
+    )
+}
+
+@Preview
+@Composable
+fun BottomBarPreview(){
+    MiniPlayerBar(
+        progress = 1.0f,
+        audio = Song(
+            title = "Title",
+            author = "Author",
+            coverBase64 = "",
+            length = 100.0,
+            isLiked = false,
+            reShares = 0,
+            id = 1L
+        ),
+        isAudioPlaying = true,
+        onPlayPauseClick = {  },
+        onBarClick = {  },
+        onLike = { },
+        onHomeClick = {},
+        onSearchClick = {  },
+        onProfileClick = {},
+        userDetail = UserDetail(
+            id = 1L,
+            name = "username",
+            bio = "bio",
+            profileImageBase64 = "",
+            email = "email",
+            songs = emptyList()
+        )
+    )
 }

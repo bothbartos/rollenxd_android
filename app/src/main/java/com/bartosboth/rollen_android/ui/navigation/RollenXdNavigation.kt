@@ -13,11 +13,13 @@ import androidx.navigation.compose.rememberNavController
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
+import com.bartosboth.rollen_android.ui.screens.audio.UiState
 import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
 import com.bartosboth.rollen_android.ui.screens.main.AuthState
 import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
+import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
@@ -28,6 +30,7 @@ fun RollenXdNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val audioViewModel: AudioViewModel = hiltViewModel()
+    val userDetailViewModel: UserDetailViewModel = hiltViewModel()
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
@@ -77,6 +80,7 @@ fun RollenXdNavigation() {
 
             MainScreen(
                 logoutViewModel = logoutViewModel,
+                userDetailViewModel = userDetailViewModel,
                 navController = navController,
                 progress = audioViewModel.progress,
                 isAudioPlaying = audioViewModel.isPlaying,
@@ -84,7 +88,12 @@ fun RollenXdNavigation() {
                 audioList = audioViewModel.audioList,
                 onItemClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
-                onNext = { audioViewModel.onUiEvent(UiEvents.SeekToNext) }
+                onLike = { if (audioViewModel.currentSelectedAudio.isLiked) {
+                    audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
+                } else {
+                    audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
+                }},
+                uiState = audioViewModel.uiState.collectAsState().value
             )
         }
 

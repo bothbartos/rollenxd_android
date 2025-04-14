@@ -1,74 +1,45 @@
 package com.bartosboth.rollen_android.ui.screens.main
 
-import android.util.Log
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.SongListItem
+import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
-import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
-import com.bartosboth.rollen_android.utils.timeStampToDuration
-import kotlin.math.floor
-import kotlin.math.roundToInt
+import com.bartosboth.rollen_android.ui.screens.audio.UiState
 
 
 @Composable
 fun MainScreen(
     logoutViewModel: LogoutViewModel,
+    userDetailViewModel: UserDetailViewModel,
     navController: NavController,
     progress: Float,
     isAudioPlaying: Boolean,
@@ -76,7 +47,8 @@ fun MainScreen(
     audioList: List<Song>,
     onStart: () -> Unit,
     onItemClick: (Int) -> Unit,
-    onNext: () -> Unit,
+    onLike: (Long) -> Unit,
+    uiState: UiState
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -105,26 +77,72 @@ fun MainScreen(
         topBar = {
             AppTopBar(
                 title = "RollenXd",
-                onLogoutClick = { showLogoutDialog = true }
+                onLogoutClick = { showLogoutDialog = true },
             )
         },
         bottomBar = {
-            MiniPlayerBar(
-                progress = progress,
-                audio = currentPlayingAudio,
-                isAudioPlaying = isAudioPlaying,
-                onPlayPauseClick = onStart,
-                onBarClick = { navController.navigate(PlayerScreen) }
-            )
+            userDetailViewModel.userDetails.collectAsState().value?.let {
+                MiniPlayerBar(
+                    progress = progress,
+                    audio = currentPlayingAudio,
+                    isAudioPlaying = isAudioPlaying,
+                    onPlayPauseClick = onStart,
+                    onLike = onLike,
+                    onHomeClick = { navController.navigate(MainScreen) },
+                    onSearchClick = { },
+                    onProfileClick = { },
+                    onBarClick = { navController.navigate(PlayerScreen) },
+                    userDetail = it
+                )
+            }
         }
     ) { innerPadding ->
-        LazyColumn(contentPadding = innerPadding) {
-            itemsIndexed(audioList) { index, song ->
-                SongListItem(
-                    song = song,
-                    isPlaying = song.id == currentPlayingAudio.id,
-                    onClick = { onItemClick(index) }
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            when (uiState) {
+                UiState.Initial -> {
+                    // Show loading indicator
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(60.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Loading songs...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                UiState.Ready -> {
+                    // Show content when ready
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "Songs:",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 7.dp, top = 4.dp)
+                        )
+                        LazyRow {
+                            itemsIndexed(audioList) { index, song ->
+                                SongListItem(
+                                    song = song,
+                                    isPlaying = song.id == currentPlayingAudio.id,
+                                    onClick = { onItemClick(index) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
