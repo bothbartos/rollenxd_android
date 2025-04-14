@@ -496,14 +496,13 @@ fun MiniPlayerBar(
 @Composable
 fun CircularBase64ImageButton(
     userDetail: UserDetail,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     size: Dp = 56.dp,
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent
 ) {
-    Log.d("BASE64", "CircularBase64ImageButton: ${userDetail.profileImageBase64}")
     Box(
         modifier = modifier
             .size(size)

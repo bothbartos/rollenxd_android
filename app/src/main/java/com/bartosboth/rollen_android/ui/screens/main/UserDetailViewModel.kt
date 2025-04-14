@@ -10,12 +10,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private val userDetailDummy = UserDetail(
+    id = 1L,
+    name = "",
+    email = "",
+    bio = "",
+    profileImageBase64 = "",
+    songs = emptyList()
+)
+
 @HiltViewModel
 class UserDetailViewModel @Inject constructor(
     private val userDetailRepository: UserDetailRepository
 ): ViewModel(){
-    private val _userDetails = MutableStateFlow<UserDetail?>(null)
-    val userDetails: StateFlow<UserDetail?> = _userDetails
+    private val _userDetails = MutableStateFlow<UserDetail>(userDetailDummy)
+    val userDetails: StateFlow<UserDetail> = _userDetails
 
     private val _bio = MutableStateFlow("")
     val bio: StateFlow<String> = _bio

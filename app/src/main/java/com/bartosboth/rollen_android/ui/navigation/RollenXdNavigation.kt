@@ -21,6 +21,7 @@ import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
+import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
 
@@ -65,22 +66,10 @@ fun RollenXdNavigation() {
         }
 
         composable<MainScreen> {
-            val logoutViewModel: LogoutViewModel = hiltViewModel()
-            val authState by logoutViewModel.authState.collectAsState()
-
-            LaunchedEffect(authState) {
-                if (authState is AuthState.LoggedOut) {
-                    if(audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
-                    navController.navigate(LoginScreen) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            }
+            val userDetails by userDetailViewModel.userDetails.collectAsState()
 
             MainScreen(
-                logoutViewModel = logoutViewModel,
-                userDetailViewModel = userDetailViewModel,
+                userDetail = userDetails,
                 navController = navController,
                 progress = audioViewModel.progress,
                 isAudioPlaying = audioViewModel.isPlaying,
@@ -101,6 +90,27 @@ fun RollenXdNavigation() {
             PlayerScreen(
                 navController = navController,
                 viewModel = audioViewModel
+            )
+        }
+
+        composable<ProfileScreen> {
+            val logoutViewModel: LogoutViewModel = hiltViewModel()
+            val authState by logoutViewModel.authState.collectAsState()
+            val userDetails by userDetailViewModel.userDetails.collectAsState()
+
+            LaunchedEffect(authState) {
+                if (authState is AuthState.LoggedOut) {
+                    if(audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
+                    navController.navigate(LoginScreen) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+            ProfileScreen(
+                userDetail = userDetails,
+                logoutViewModel = logoutViewModel,
+                navController = navController
             )
         }
     }
