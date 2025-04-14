@@ -77,7 +77,6 @@ fun MainScreen(
         topBar = {
             AppTopBar(
                 title = "RollenXd",
-                onLogoutClick = { showLogoutDialog = true },
             )
         },
         bottomBar = {

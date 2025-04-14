@@ -529,8 +529,7 @@ fun CircularBase64ImageButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
-    title: String,
-    onLogoutClick: () -> Unit
+    title: String
 ) {
     TopAppBar(
         title = {
