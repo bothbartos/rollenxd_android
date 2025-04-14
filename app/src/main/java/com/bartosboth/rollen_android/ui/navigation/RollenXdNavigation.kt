@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
+import com.bartosboth.rollen_android.ui.screens.audio.UiState
 import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
 import com.bartosboth.rollen_android.ui.screens.main.AuthState
@@ -91,7 +92,8 @@ fun RollenXdNavigation() {
                     audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
                 } else {
                     audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
-                }}
+                }},
+                uiState = audioViewModel.uiState.collectAsState().value
             )
         }
 

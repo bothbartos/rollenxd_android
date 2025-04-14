@@ -457,27 +457,35 @@ fun MiniPlayerBar(
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                 ){
-                    IconButton(onClick = onHomeClick) {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Home"
-                        )
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center) {
+                        IconButton(onClick = onHomeClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = "Home"
+                            )
+                        }
                     }
 
-                    IconButton(onClick = onSearchClick) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "Search"
-                        )
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center) {
+                        IconButton(onClick = onSearchClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "Search"
+                            )
+                        }
                     }
 
-                    CircularBase64ImageButton(
-                        userDetail = userDetail,
-                        onClick = onProfileClick,
-                        contentDescription = "Profile",
-                        size = 30.dp
-
-                    )
+                    Box(modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center){
+                        CircularBase64ImageButton(
+                            userDetail = userDetail,
+                            onClick = onProfileClick,
+                            contentDescription = "Profile",
+                            size = 30.dp
+                        )
+                    }
                 }
             }
         }
@@ -523,19 +531,15 @@ fun AppTopBar(
     onLogoutClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(title) },
-        actions = {
-            IconButton(onClick = onLogoutClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout"
-                )
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Icon(painter = painterResource(R.drawable.rollenxdicon), contentDescription = "Rollenxd")
+                Text(title)
             }
-        },
+                },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
