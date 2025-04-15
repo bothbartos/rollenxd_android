@@ -193,7 +193,8 @@ class AudioViewModel @Inject constructor(
     fun likeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if(repository.likeSong(id) == 200) _currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = true)
+                if (repository.likeSong(id) == 200) _currentSelectedAudio.value =
+                    _currentSelectedAudio.value.copy(isLiked = true)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = true) else song
                 }
@@ -206,7 +207,8 @@ class AudioViewModel @Inject constructor(
     fun unlikeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if(repository.unlikeSong(id) == 200)_currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = false)
+                if (repository.unlikeSong(id) == 200) _currentSelectedAudio.value =
+                    _currentSelectedAudio.value.copy(isLiked = false)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = false) else song
                 }
@@ -216,12 +218,31 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    fun resetState() {
+        _currentSelectedAudio.value =
+            audioDummy.copy(title = "No song selected", author = "Unknown")
+        _audioList.value = emptyList()
+        _uiState.value = UiState.Initial
+    }
+
     @SuppressLint("DefaultLocale")
     private fun formatDuration(currentProgress: Long): String {
         val minutes = TimeUnit.MILLISECONDS.toMinutes(currentProgress)
         val seconds =
             TimeUnit.MILLISECONDS.toSeconds(currentProgress) % TimeUnit.MINUTES.toSeconds(1)
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    fun refreshAudioData() {
+        viewModelScope.launch {
+            try {
+                val songs = repository.getAudioData()
+                _audioList.value = songs
+                setMediaItems()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
 

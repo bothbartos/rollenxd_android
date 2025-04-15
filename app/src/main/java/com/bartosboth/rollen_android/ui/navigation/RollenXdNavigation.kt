@@ -1,5 +1,6 @@
 package com.bartosboth.rollen_android.ui.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,9 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bartosboth.rollen_android.data.manager.DataRefreshCoordinator
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
@@ -35,6 +38,9 @@ fun RollenXdNavigation() {
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
+    val dataRefreshCoordinator = remember {
+        DataRefreshCoordinator(userDetailViewModel, audioViewModel)
+    }
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable<LoginScreen> {
@@ -43,6 +49,7 @@ fun RollenXdNavigation() {
                 loginViewModel,
                 onNavigateToRegister = { navController.navigate(RegisterScreen) },
                 onLoginSuccess = {
+                    dataRefreshCoordinator.refresh()
                     navController.navigate(MainScreen) {
                         popUpTo(LoginScreen) { inclusive = true }
                     }
@@ -66,7 +73,7 @@ fun RollenXdNavigation() {
         }
 
         composable<MainScreen> {
-            val userDetails by userDetailViewModel.userDetails.collectAsState()
+            val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
 
             MainScreen(
                 userDetail = userDetails,
@@ -97,10 +104,13 @@ fun RollenXdNavigation() {
             val logoutViewModel: LogoutViewModel = hiltViewModel()
             val authState by logoutViewModel.authState.collectAsState()
             val userDetails by userDetailViewModel.userDetails.collectAsState()
+            val updateState by userDetailViewModel.updateState.collectAsState()
 
             LaunchedEffect(authState) {
                 if (authState is AuthState.LoggedOut) {
                     if(audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
+                    audioViewModel.resetState()
+                    userDetailViewModel.resetState()
                     navController.navigate(LoginScreen) {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         launchSingleTop = true
@@ -109,6 +119,11 @@ fun RollenXdNavigation() {
             }
             ProfileScreen(
                 userDetail = userDetails,
+                updateState = updateState,
+                onProfileUpdate = { bio, profilePictureBase64 ->
+                    Log.d("PROFILESCREEN", "RollenXdNavigation: $bio")
+                    userDetailViewModel.updateUserDetails(bio, profilePictureBase64)
+                },
                 logoutViewModel = logoutViewModel,
                 navController = navController
             )

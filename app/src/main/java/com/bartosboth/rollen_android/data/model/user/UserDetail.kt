@@ -1,11 +1,11 @@
-package com.bartosboth.rollen_android.data.model
+package com.bartosboth.rollen_android.data.model.user
 
 import android.os.Parcelable
 import com.bartosboth.rollen_android.data.model.song.Song
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class UserDetail(
+data class UserDetail(
     val id: Long,
     val name: String,
     val email: String,

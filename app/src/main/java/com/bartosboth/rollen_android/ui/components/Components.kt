@@ -19,10 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
@@ -34,7 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -52,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -70,7 +68,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
-import com.bartosboth.rollen_android.data.model.UserDetail
+import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -110,12 +108,13 @@ fun CustomButton(
     text: String,
     onClick: () -> Unit,
     isEnabled: Boolean = true,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
         enabled = isEnabled,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -503,6 +502,11 @@ fun CircularBase64ImageButton(
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent
 ) {
+    val imageKey = remember(userDetail.profileImageBase64) {
+        "${userDetail.id}_${userDetail.profileImageBase64.hashCode()}"
+    }
+    Log.d("IMAGEKEY", "CircularBase64ImageButton: $imageKey")
+
     Box(
         modifier = modifier
             .size(size)
@@ -514,8 +518,8 @@ fun CircularBase64ImageButton(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(convertBase64ToByteArr(userDetail.profileImageBase64))
-                .memoryCacheKey(userDetail.name.toString())
-                .placeholderMemoryCacheKey(userDetail.name.toString())
+                .memoryCacheKey(imageKey)
+                .placeholderMemoryCacheKey(imageKey)
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
