@@ -60,7 +60,7 @@ fun ProfileScreen(
     val scrollState = rememberScrollState()
 
     val profileActions = listOf(
-        AppBarAction("Logout") { logoutViewModel.logout() }
+        AppBarAction("Logout") { showLogoutDialog = true }
     )
 
 
