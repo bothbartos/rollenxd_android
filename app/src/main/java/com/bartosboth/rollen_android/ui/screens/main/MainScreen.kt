@@ -10,36 +10,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
+import com.bartosboth.rollen_android.ui.navigation.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.audio.UiState
 
 
 @Composable
 fun MainScreen(
-    logoutViewModel: LogoutViewModel,
-    userDetailViewModel: UserDetailViewModel,
+    userDetail: UserDetail,
     navController: NavController,
     progress: Float,
     isAudioPlaying: Boolean,
@@ -50,28 +44,6 @@ fun MainScreen(
     onLike: (Long) -> Unit,
     uiState: UiState
 ) {
-    var showLogoutDialog by remember { mutableStateOf(false) }
-
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Logout") },
-            text = { Text("Are you sure you want to logout?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showLogoutDialog = false
-                    logoutViewModel.logout()
-                }) {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("No")
-                }
-            }
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -80,20 +52,19 @@ fun MainScreen(
             )
         },
         bottomBar = {
-            userDetailViewModel.userDetails.collectAsState().value?.let {
-                MiniPlayerBar(
-                    progress = progress,
-                    audio = currentPlayingAudio,
-                    isAudioPlaying = isAudioPlaying,
-                    onPlayPauseClick = onStart,
-                    onLike = onLike,
-                    onHomeClick = { navController.navigate(MainScreen) },
-                    onSearchClick = { },
-                    onProfileClick = { },
-                    onBarClick = { navController.navigate(PlayerScreen) },
-                    userDetail = it
-                )
-            }
+            MiniPlayerBar(
+                progress = progress,
+                audio = currentPlayingAudio,
+                isAudioPlaying = isAudioPlaying,
+                onPlayPauseClick = onStart,
+                onLike = onLike,
+                onHomeClick = { navController.navigate(MainScreen) },
+                onSearchClick = { },
+                onProfileClick = { navController.navigate(ProfileScreen) },
+                onBarClick = { navController.navigate(PlayerScreen) },
+                userDetail = userDetail
+            )
+
         }
     ) { innerPadding ->
         Box(
@@ -104,7 +75,6 @@ fun MainScreen(
         ) {
             when (uiState) {
                 UiState.Initial -> {
-                    // Show loading indicator
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -123,7 +93,6 @@ fun MainScreen(
                 }
 
                 UiState.Ready -> {
-                    // Show content when ready
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
                             text = "Songs:",

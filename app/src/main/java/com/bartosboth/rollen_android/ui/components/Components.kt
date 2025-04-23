@@ -19,10 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
@@ -30,11 +30,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -70,7 +71,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
-import com.bartosboth.rollen_android.data.model.UserDetail
+import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
@@ -107,6 +108,7 @@ fun CustomTextField(
 
 @Composable
 fun CustomButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,
     isEnabled: Boolean = true,
@@ -115,7 +117,7 @@ fun CustomButton(
     Button(
         onClick = onClick,
         enabled = isEnabled,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -183,11 +185,11 @@ fun CoverImage(
 
 @Composable
 fun SongInfo(
+    modifier: Modifier = Modifier,
     title: String?,
     artist: String?,
     titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    artistStyle: TextStyle = MaterialTheme.typography.titleSmall,
-    modifier: Modifier = Modifier
+    artistStyle: TextStyle = MaterialTheme.typography.titleSmall
 ) {
     Column(modifier = modifier.padding(horizontal = 8.dp)) {
         Text(
@@ -366,7 +368,7 @@ fun SongListItem(
             Spacer(modifier = Modifier.height(5.dp))
 
             Text(
-                text = song.title ?: "Unknown title",
+                text = song.title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
@@ -374,7 +376,7 @@ fun SongListItem(
             )
 
             Text(
-                text = song.author ?: "Unknown artist",
+                text = song.author,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
@@ -496,14 +498,18 @@ fun MiniPlayerBar(
 @Composable
 fun CircularBase64ImageButton(
     userDetail: UserDetail,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     size: Dp = 56.dp,
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent
 ) {
-    Log.d("BASE64", "CircularBase64ImageButton: ${userDetail.profileImageBase64}")
+    val imageKey = remember(userDetail.profileImageBase64) {
+        "${userDetail.id}_${userDetail.profileImageBase64.hashCode()}"
+    }
+    Log.d("IMAGEKEY", "CircularBase64ImageButton: $imageKey")
+
     Box(
         modifier = modifier
             .size(size)
@@ -515,8 +521,8 @@ fun CircularBase64ImageButton(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(convertBase64ToByteArr(userDetail.profileImageBase64))
-                .memoryCacheKey(userDetail.name.toString())
-                .placeholderMemoryCacheKey(userDetail.name.toString())
+                .memoryCacheKey(imageKey)
+                .placeholderMemoryCacheKey(imageKey)
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
@@ -525,23 +531,64 @@ fun CircularBase64ImageButton(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
-    title: String
+    title: String,
+    onBack: (() -> Unit)? = null,
+    actions: List<AppBarAction> = emptyList()
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Icon(painter = painterResource(R.drawable.rollenxdicon), contentDescription = "Rollenxd")
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = if (onBack != null) 0.dp else 16.dp)
+            ) {
+                onBack?.let {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .clickable { it() }
+                            .padding(end = 8.dp)
+                    )
+                }
                 Text(title)
             }
-                },
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
+        ),
+        actions = {
+            if (actions.isNotEmpty()) {
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        actions.forEach { action ->
+                            DropdownMenuItem(
+                                text = { Text(action.title) },
+                                onClick = {
+                                    action.onClick()
+                                    showMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     )
 }
 

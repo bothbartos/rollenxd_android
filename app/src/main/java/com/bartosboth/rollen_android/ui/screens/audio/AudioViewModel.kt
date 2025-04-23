@@ -3,7 +3,6 @@
 package com.bartosboth.rollen_android.ui.screens.audio
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
@@ -86,7 +85,7 @@ class AudioViewModel @Inject constructor(
         val mediaItems = audioList.map { song ->
             Log.d("SONG_IDS", "setMediaItems: ${song.id}")
             MediaItem.Builder()
-                .setUri(Uri.parse("http://${Constants.BASE_URL}/api/song/stream/${song.id}"))
+                .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(song.title)
@@ -193,7 +192,8 @@ class AudioViewModel @Inject constructor(
     fun likeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if(repository.likeSong(id) == 200) _currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = true)
+                if (repository.likeSong(id) == 200) _currentSelectedAudio.value =
+                    _currentSelectedAudio.value.copy(isLiked = true)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = true) else song
                 }
@@ -206,7 +206,8 @@ class AudioViewModel @Inject constructor(
     fun unlikeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if(repository.unlikeSong(id) == 200)_currentSelectedAudio.value = _currentSelectedAudio.value.copy(isLiked = false)
+                if (repository.unlikeSong(id) == 200) _currentSelectedAudio.value =
+                    _currentSelectedAudio.value.copy(isLiked = false)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = false) else song
                 }
@@ -216,12 +217,31 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    fun resetState() {
+        _currentSelectedAudio.value =
+            audioDummy.copy(title = "No song selected", author = "Unknown")
+        _audioList.value = emptyList()
+        _uiState.value = UiState.Initial
+    }
+
     @SuppressLint("DefaultLocale")
     private fun formatDuration(currentProgress: Long): String {
         val minutes = TimeUnit.MILLISECONDS.toMinutes(currentProgress)
         val seconds =
             TimeUnit.MILLISECONDS.toSeconds(currentProgress) % TimeUnit.MINUTES.toSeconds(1)
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    fun refreshAudioData() {
+        viewModelScope.launch {
+            try {
+                val songs = repository.getAudioData()
+                _audioList.value = songs
+                setMediaItems()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
 

@@ -23,9 +23,9 @@ class LoginViewModel @Inject constructor(
                 _loginState.value = LoginState.Loading
 
                 val response = authRepository.login(username, password)
-                    response.let {
-                        _loginState.value = LoginState.Success
-                    }
+                response.let {
+                    _loginState.value = LoginState.Success
+                }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error("Login error: ${e.message}")
             }

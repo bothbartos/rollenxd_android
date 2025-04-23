@@ -1,6 +1,7 @@
 package com.bartosboth.rollen_android.ui.screens.login
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -94,7 +95,8 @@ fun LoginScreen(
             text = "Login",
             onClick = { viewModel.login(username, password) },
             isEnabled = username.isNotEmpty() && password.isNotEmpty(),
-            isLoading = loginState is LoginState.Loading
+            isLoading = loginState is LoginState.Loading,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))

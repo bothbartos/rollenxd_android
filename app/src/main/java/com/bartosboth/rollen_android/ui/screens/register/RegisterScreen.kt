@@ -132,7 +132,8 @@ fun RegisterScreen(
             text = "Register",
             onClick = { viewModel.register(username, password, email) },
             isEnabled = username.isNotEmpty() && password.isNotEmpty() && email.isNotEmpty() && password == confirmPassword,
-            isLoading = registerState is RegisterState.Loading
+            isLoading = registerState is RegisterState.Loading,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
