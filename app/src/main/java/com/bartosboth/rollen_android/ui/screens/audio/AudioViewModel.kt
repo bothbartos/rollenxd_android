@@ -3,7 +3,6 @@
 package com.bartosboth.rollen_android.ui.screens.audio
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
@@ -86,7 +85,7 @@ class AudioViewModel @Inject constructor(
         val mediaItems = audioList.map { song ->
             Log.d("SONG_IDS", "setMediaItems: ${song.id}")
             MediaItem.Builder()
-                .setUri(Uri.parse("http://${Constants.BASE_URL}/api/song/stream/${song.id}"))
+                .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(song.title)

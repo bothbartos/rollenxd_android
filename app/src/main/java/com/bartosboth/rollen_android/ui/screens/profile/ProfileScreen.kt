@@ -32,12 +32,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.bartosboth.rollen_android.data.model.user.UserDetail
+import com.bartosboth.rollen_android.ui.components.AppBarAction
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.CircularBase64ImageButton
 import com.bartosboth.rollen_android.ui.components.CustomButton
@@ -54,9 +54,15 @@ fun ProfileScreen(
     updateState: UpdateState,
     onProfileUpdate: (String, Uri?) -> Unit,
     navController: NavController
-) {
+    ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showEditForm by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    val profileActions = listOf(
+        AppBarAction("Logout") { logoutViewModel.logout() }
+    )
+
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -82,7 +88,9 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "RollenXd"
+                title = "RollenXd",
+                actions = profileActions,
+                onBack = { navController.popBackStack() }
             )
         }
     ) { innerPadding ->
@@ -90,21 +98,25 @@ fun ProfileScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-        ) {
+                .verticalScroll(scrollState)
+            ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically) {
                     CircularBase64ImageButton(
                         userDetail = userDetail,
                         size = 130.dp,
                         modifier = Modifier.padding(5.dp),
-                        onClick = {showEditForm = true}
+                        onClick = {showEditForm = !showEditForm}
                     )
                     Column(modifier = Modifier.padding(start = 10.dp)) {
                         Text(userDetail.name)
                         Text(userDetail.email)
+                        CustomButton(text= "Edit Profile", onClick = {showEditForm = !showEditForm})
                     }
                 }
                 if(userDetail.songs.isEmpty()){
@@ -125,16 +137,12 @@ fun ProfileScreen(
                     UserEditForm(
                         userDetail = userDetail,
                         updateState = updateState,
-                        onSubmit =  onProfileUpdate,
+                        onSubmit = {bio, profilePicture ->
+                                    onProfileUpdate(bio, profilePicture)
+                                   showEditForm = false},
                         onDismiss = { showEditForm = false }
                         )
                 }
-                CustomButton(
-                    "Logout",
-                    onClick = { showLogoutDialog = true },
-                    isEnabled = true,
-                    isLoading = false,
-                )
             }
         }
     }
@@ -150,9 +158,6 @@ fun UserEditForm(
 ) {
     var bio by remember { mutableStateOf(userDetail.bio) }
     var profilePictureUri by remember { mutableStateOf<Uri?>(null) }
-    val context = LocalContext.current
-    val scrollState = rememberScrollState()
-
     val pickMedia = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -162,8 +167,7 @@ fun UserEditForm(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

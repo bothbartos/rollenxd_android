@@ -19,8 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
@@ -28,6 +30,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -105,11 +108,11 @@ fun CustomTextField(
 
 @Composable
 fun CustomButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,
     isEnabled: Boolean = true,
-    isLoading: Boolean = false,
-    modifier: Modifier = Modifier
+    isLoading: Boolean = false
 ) {
     Button(
         onClick = onClick,
@@ -182,11 +185,11 @@ fun CoverImage(
 
 @Composable
 fun SongInfo(
+    modifier: Modifier = Modifier,
     title: String?,
     artist: String?,
     titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    artistStyle: TextStyle = MaterialTheme.typography.titleSmall,
-    modifier: Modifier = Modifier
+    artistStyle: TextStyle = MaterialTheme.typography.titleSmall
 ) {
     Column(modifier = modifier.padding(horizontal = 8.dp)) {
         Text(
@@ -365,7 +368,7 @@ fun SongListItem(
             Spacer(modifier = Modifier.height(5.dp))
 
             Text(
-                text = song.title ?: "Unknown title",
+                text = song.title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
@@ -373,7 +376,7 @@ fun SongListItem(
             )
 
             Text(
-                text = song.author ?: "Unknown artist",
+                text = song.author,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
@@ -528,23 +531,64 @@ fun CircularBase64ImageButton(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
-    title: String
+    title: String,
+    onBack: (() -> Unit)? = null,
+    actions: List<AppBarAction> = emptyList()
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Icon(painter = painterResource(R.drawable.rollenxdicon), contentDescription = "Rollenxd")
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = if (onBack != null) 0.dp else 16.dp)
+            ) {
+                onBack?.let {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .clickable { it() }
+                            .padding(end = 8.dp)
+                    )
+                }
                 Text(title)
             }
-                },
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
+        ),
+        actions = {
+            if (actions.isNotEmpty()) {
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        actions.forEach { action ->
+                            DropdownMenuItem(
+                                text = { Text(action.title) },
+                                onClick = {
+                                    action.onClick()
+                                    showMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     )
 }
 
