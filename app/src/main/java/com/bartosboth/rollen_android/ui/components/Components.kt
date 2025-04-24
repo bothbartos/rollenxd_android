@@ -410,48 +410,52 @@ fun MiniPlayerBar(
     onHomeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onProfileClick: () -> Unit,
-    userDetail: UserDetail
+    userDetail: UserDetail,
+    currentPlayingAudioId: Long = -1L
 ) {
     BottomAppBar(
-        modifier = Modifier.height(150.dp),
+        modifier = Modifier.height(if(currentPlayingAudioId == -1L) 91.dp else 150.dp),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
             Column(
                 modifier = Modifier.padding(8.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(3.dp)
-                        .clickable { onBarClick() },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CoverImage(
-                        coverBase64 = audio.coverBase64,
-                        songId = audio.id,
-                        size = 53.dp
-                    )
+                if(currentPlayingAudioId != -1L){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .padding(3.dp)
+                            .clickable { onBarClick() },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
 
-                    SongInfo(
-                        title = audio.title,
-                        artist = audio.author,
-                        modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        CoverImage(
+                            coverBase64 = audio.coverBase64,
+                            songId = audio.id,
+                            size = 53.dp
+                        )
 
-                    LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
+                        SongInfo(
+                            title = audio.title,
+                            artist = audio.author,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                    PlayPauseButton(
-                        isPlaying = isAudioPlaying,
-                        onClick = onPlayPauseClick
+                        LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
+
+                        PlayPauseButton(
+                            isPlaying = isAudioPlaying,
+                            onClick = onPlayPauseClick
+                        )
+                    }
+
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        progress = { progress / 100 }
                     )
                 }
-
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { progress / 100 }
-                )
 
                 Row(
                     modifier = Modifier

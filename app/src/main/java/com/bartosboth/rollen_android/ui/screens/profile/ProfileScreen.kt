@@ -43,7 +43,6 @@ import com.bartosboth.rollen_android.ui.components.CircularBase64ImageButton
 import com.bartosboth.rollen_android.ui.components.CustomButton
 import com.bartosboth.rollen_android.ui.components.CustomTextField
 import com.bartosboth.rollen_android.ui.components.SongListItem
-import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.UpdateState
 import kotlin.io.encoding.ExperimentalEncodingApi
 

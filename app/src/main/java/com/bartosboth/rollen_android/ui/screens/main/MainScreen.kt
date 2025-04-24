@@ -62,9 +62,9 @@ fun MainScreen(
                 onSearchClick = { },
                 onProfileClick = { navController.navigate(ProfileScreen) },
                 onBarClick = { navController.navigate(PlayerScreen) },
-                userDetail = userDetail
-            )
-
+                userDetail = userDetail,
+                currentPlayingAudioId = currentPlayingAudio.id,
+                )
         }
     ) { innerPadding ->
         Box(
