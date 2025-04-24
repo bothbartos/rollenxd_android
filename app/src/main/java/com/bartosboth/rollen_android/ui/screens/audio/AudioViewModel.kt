@@ -80,6 +80,9 @@ class AudioViewModel @Inject constructor(
     private val _selectedPlaylist = mutableStateOf<Playlist>(playlistDummy)
     val selectedPlaylist: Playlist get() = _selectedPlaylist.value
 
+    private val _likedSongs = mutableStateOf<List<Song>>(emptyList())
+    val likedSongs: List<Song> get() = _likedSongs.value
+
     init {
         loadAudioData()
         observePlayerEvents()
@@ -90,8 +93,16 @@ class AudioViewModel @Inject constructor(
             try {
                 val songs = audioRepo.getAudioData()
                 val playlist = playlistRepo.getPlaylists()
+                val likedSongs = audioRepo.getLikedSongs()
+                val likedSongPlaylist = PlaylistData(
+                    id = 0L,
+                    title = "Liked Songs",
+                    author = "You",
+                    coverBase64 = "",
+                )
                 _audioList.value = songs
-                _playlists.value = playlist
+                _likedSongs.value = likedSongs
+                _playlists.value = listOf(likedSongPlaylist) + playlist
                 _uiState.value = UiState.Ready
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -103,7 +114,13 @@ class AudioViewModel @Inject constructor(
         Log.d("PLAYLIST_ID", "playPlaylist: $id")
         viewModelScope.launch {
             try{
-                val playlist = playlistRepo.getPlaylistById(id)
+                val playlist = if(id == 0L) Playlist(
+                    id = 0L,
+                    title = "Liked Songs",
+                    author = "You",
+                    coverBase64 = "",
+                    songs = likedSongs
+                ) else playlistRepo.getPlaylistById(id)
                 _selectedPlaylist.value = playlist
 
                 songServiceHandler.setMediaItemList(emptyList())
@@ -116,11 +133,6 @@ class AudioViewModel @Inject constructor(
             }
         }
     }
-
-    private fun setMediaItems() {
-        Log.d("AudioViewModel", "setMediaItems: Not loading all songs at once")
-    }
-
     private fun createMediaItem(song: Song): MediaItem{
        return  MediaItem.Builder()
             .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
@@ -275,7 +287,6 @@ class AudioViewModel @Inject constructor(
             try {
                 val songs = audioRepo.getAudioData()
                 _audioList.value = songs
-                setMediaItems()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

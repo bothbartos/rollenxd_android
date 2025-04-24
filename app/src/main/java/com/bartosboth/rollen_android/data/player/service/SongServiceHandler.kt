@@ -45,6 +45,7 @@ class SongServiceHandler @Inject constructor(
         exoPlayer.clearMediaItems()
         exoPlayer.setMediaItems(mediaItems)
         exoPlayer.prepare()
+        exoPlayer.play()
     }
 
     fun addMediaItem(songId: Long, mediaItem: MediaItem) {

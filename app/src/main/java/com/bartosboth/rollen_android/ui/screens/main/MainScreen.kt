@@ -125,11 +125,19 @@ fun MainScreen(
                         LazyRow {
                             itemsIndexed(playlists) { index, playlist ->
                                 Log.d("PLAYLISTMAINSCREEN", "MainScreen: Playlist id: ${playlist.id} currentplaylist id ${currentPlayingPlaylist.id}")
-                                PlaylistListItem(
-                                    playlist = playlist,
-                                    isPlaying = playlist.id == currentPlayingPlaylist.id,
-                                    onClick = { onPlaylistClick(index) },
-                                )
+                                if(playlist.author == userDetail.name){
+                                    PlaylistListItem(
+                                        playlist = playlist.copy(author = "You"),
+                                        isPlaying = playlist.id == currentPlayingPlaylist.id,
+                                        onClick = { onPlaylistClick(index) },
+                                    )
+                                }else{
+                                    PlaylistListItem(
+                                        playlist = playlist,
+                                        isPlaying = playlist.id == currentPlayingPlaylist.id,
+                                        onClick = { onPlaylistClick(index) },
+                                    )
+                                }
                             }
                         }
                     }

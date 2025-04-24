@@ -61,4 +61,15 @@ class AudioRepository @Inject constructor(
         }
         response.code()
     }
+
+    suspend fun getLikedSongs(): List<Song> = withContext(Dispatchers.IO) {
+        val response = songApi.getLikedSongs()
+        if (response.isSuccessful) {
+            response.body() ?: throw IllegalStateException("Response body is null")
+        } else {
+            Log.e("AudioRepository", "Error getting liked songs: ${response.code()} - ${response.message()}")
+            throw HttpException(response)
+        }
+        response.body()!!
+    }
 }
