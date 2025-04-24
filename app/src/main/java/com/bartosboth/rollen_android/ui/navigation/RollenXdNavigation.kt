@@ -16,11 +16,10 @@ import com.bartosboth.rollen_android.data.manager.DataRefreshCoordinator
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
-import com.bartosboth.rollen_android.ui.screens.audio.UiState
 import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
-import com.bartosboth.rollen_android.ui.screens.main.AuthState
-import com.bartosboth.rollen_android.ui.screens.main.LogoutViewModel
+import com.bartosboth.rollen_android.ui.screens.profile.AuthState
+import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen

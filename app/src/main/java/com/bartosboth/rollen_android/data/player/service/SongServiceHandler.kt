@@ -1,18 +1,15 @@
 package com.bartosboth.rollen_android.data.player.service
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.extractor.DefaultExtractorsFactory
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +33,8 @@ class SongServiceHandler @Inject constructor(
     private var _audioState: MutableStateFlow<AudioState> = MutableStateFlow(AudioState.Initial)
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
+    private val mediaItemsMap = mutableMapOf<Long, MediaItem>()
+
     private var job: Job? = null
 
     init {
@@ -43,14 +42,71 @@ class SongServiceHandler @Inject constructor(
     }
 
     fun setMediaItemList(mediaItems: List<MediaItem>) {
-        exoPlayer.setMediaItems(mediaItems)
-        exoPlayer.prepare()
+        exoPlayer.clearMediaItems()
+    }
+
+    fun addMediaItem(songId: Long, mediaItem: MediaItem) {
+        mediaItemsMap[songId] = mediaItem
+
+        // If this is the first song, set it directly
+        if (exoPlayer.mediaItemCount == 0) {
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            exoPlayer.play()
+        } else {
+            // Check if we're currently playing this song
+            val currentSongId = exoPlayer.currentMediaItem?.mediaMetadata?.extras?.getLong("songId")
+            if (currentSongId == songId) {
+                // Already playing this song, just toggle play state
+                if (exoPlayer.isPlaying) {
+                    exoPlayer.pause()
+                } else {
+                    exoPlayer.play()
+                }
+            } else {
+                // Add to playlist if not already there
+                if (!mediaItemsMap.containsKey(songId)) {
+                    exoPlayer.addMediaItem(mediaItem)
+                }
+
+                // Find the index of this song in the current playlist
+                val index = findMediaItemIndex(songId)
+                if (index != -1) {
+                    exoPlayer.seekTo(index, 0)
+                    exoPlayer.prepare()
+                    exoPlayer.play()
+                }
+            }
+        }
+    }
+
+    private fun findMediaItemIndex(songId: Long): Int {
+        for (i in 0 until exoPlayer.mediaItemCount) {
+            val item = exoPlayer.getMediaItemAt(i)
+            val id = item.mediaMetadata.extras?.getLong("songId")
+            if (id == songId) {
+                return i
+            }
+        }
+        return -1
     }
 
     @OptIn(UnstableApi::class)
     fun playStreamingAudio(songId: Long) {
         try {
-            val audioUri = Uri.parse("http://${Constants.BASE_URL}/api/song/stream/$songId")
+            // Check if we already have this media item
+            if (mediaItemsMap.containsKey(songId)) {
+                val index = findMediaItemIndex(songId)
+                if (index != -1) {
+                    exoPlayer.seekTo(index, 0)
+                    exoPlayer.prepare()
+                    exoPlayer.play()
+                    return
+                }
+            }
+
+            // Otherwise create a new media item
+            val audioUri = "http://${Constants.BASE_URL}/api/song/stream/$songId".toUri()
             Log.d("SongServiceHandler", "Attempting to stream from: $audioUri")
 
             val dataSourceFactory = DefaultDataSource.Factory(context)
@@ -71,9 +127,8 @@ class SongServiceHandler @Inject constructor(
         seekPosition: Long = 0
     ) {
         when (playerEvent) {
-            PlayerEvent.Backward -> exoPlayer.seekBack()
-            PlayerEvent.Forward -> exoPlayer.seekForward()
-            PlayerEvent.SeekToNext -> exoPlayer.seekToNextMediaItem()
+            PlayerEvent.Next -> exoPlayer.seekToNextMediaItem()
+            PlayerEvent.Previous -> exoPlayer.seekToPreviousMediaItem()
             PlayerEvent.PlayPause -> playOrPause()
             PlayerEvent.SeekTo -> {
                 Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
@@ -205,9 +260,8 @@ sealed class AudioState {
 sealed class PlayerEvent {
     object PlayPause : PlayerEvent()
     object SelectedAudioChange : PlayerEvent()
-    object Backward : PlayerEvent()
-    object SeekToNext : PlayerEvent()
-    object Forward : PlayerEvent()
+    object Next : PlayerEvent()
+    object Previous : PlayerEvent()
     object SeekTo : PlayerEvent()
     object Stop : PlayerEvent()
 }

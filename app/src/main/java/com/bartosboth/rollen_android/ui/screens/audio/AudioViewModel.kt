@@ -32,13 +32,13 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private val audioDummy = Song(
-    title = "",
-    author = "",
+    title = "No song selected",
+    author = "Unknown",
     coverBase64 = "",
     length = 0.0,
     isLiked = false,
     reShares = 0,
-    id = 1L
+    id = -1L  // Use -1 as a special ID
 )
 
 @HiltViewModel
@@ -54,7 +54,7 @@ class AudioViewModel @Inject constructor(
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
 
     private val _currentSelectedAudio =
-        mutableStateOf(audioDummy.copy(title = "No song selected", author = "Unknown"))
+        mutableStateOf(audioDummy)
     val currentSelectedAudio: Song get() = _currentSelectedAudio.value
 
     private val _audioList = mutableStateOf<List<Song>>(emptyList())
@@ -73,32 +73,16 @@ class AudioViewModel @Inject constructor(
             try {
                 val songs = repository.getAudioData()
                 _audioList.value = songs
-
-                setMediaItems()
+                _uiState.value = UiState.Ready
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    private fun setMediaItems() {
-        val mediaItems = audioList.map { song ->
-            Log.d("SONG_IDS", "setMediaItems: ${song.id}")
-            MediaItem.Builder()
-                .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.author)
-                        .setExtras(Bundle().apply {
-                            putLong("songId", song.id)
-                        })
-                        .build()
-                )
-                .build()
-        }
 
-        songServiceHandler.setMediaItemList(mediaItems)
+    private fun setMediaItems() {
+        Log.d("AudioViewModel", "setMediaItems: Not loading all songs at once")
     }
 
     fun playSong(songId: Long) {
@@ -108,6 +92,23 @@ class AudioViewModel @Inject constructor(
                 Log.d("SELECTEDSONG", "playSong: selected song ${selectedSong?.id} ")
                 if (selectedSong != null) {
                     _currentSelectedAudio.value = selectedSong
+
+                    // Create a media item for this song
+                    val mediaItem = MediaItem.Builder()
+                        .setUri("http://${Constants.BASE_URL}/api/song/stream/${songId}".toUri())
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle(selectedSong.title)
+                                .setArtist(selectedSong.author)
+                                .setExtras(Bundle().apply {
+                                    putLong("songId", songId)
+                                })
+                                .build()
+                        )
+                        .build()
+
+                    // Add this single item to the player
+                    songServiceHandler.addMediaItem(songId, mediaItem)
                     songServiceHandler.playStreamingAudio(songId)
                 }
             } catch (e: Exception) {
@@ -120,9 +121,8 @@ class AudioViewModel @Inject constructor(
     fun onUiEvent(uiEvents: UiEvents) {
         viewModelScope.launch {
             when (uiEvents) {
-                UiEvents.Backward -> songServiceHandler.onPlayerEvents(PlayerEvent.Backward)
-                UiEvents.Forward -> songServiceHandler.onPlayerEvents(PlayerEvent.Forward)
-                UiEvents.SeekToNext -> songServiceHandler.onPlayerEvents(PlayerEvent.SeekToNext)
+                UiEvents.Next -> songServiceHandler.onPlayerEvents(PlayerEvent.Next)
+                UiEvents.Previous -> songServiceHandler.onPlayerEvents(PlayerEvent.Previous)
                 is UiEvents.PlayPause -> {
                     songServiceHandler.onPlayerEvents(PlayerEvent.PlayPause)
                     isPlaying = !isPlaying
@@ -255,9 +255,8 @@ sealed class UiEvents {
     object PlayPause : UiEvents()
     data class SelectedAudioChange(val index: Int) : UiEvents()
     data class SeekTo(val position: Float) : UiEvents()
-    object SeekToNext : UiEvents()
-    object Backward : UiEvents()
-    object Forward : UiEvents()
+    object Next : UiEvents()
+    object Previous : UiEvents()
     data class UpdateProgress(val newProgress: Float) : UiEvents()
 
 }
