@@ -16,11 +16,14 @@ import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.bartosboth.rollen_android.data.model.playlist.Playlist
+import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.AudioRepository
 import com.bartosboth.rollen_android.data.player.service.AudioState
 import com.bartosboth.rollen_android.data.player.service.PlayerEvent
 import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
+import com.bartosboth.rollen_android.data.repository.PlaylistRepository
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,13 +41,14 @@ private val audioDummy = Song(
     length = 0.0,
     isLiked = false,
     reShares = 0,
-    id = -1L  // Use -1 as a special ID
+    id = -1L
 )
 
 @HiltViewModel
 class AudioViewModel @Inject constructor(
     private val songServiceHandler: SongServiceHandler,
-    private val repository: AudioRepository,
+    private val audioRepo: AudioRepository,
+    private val playlistRepo: PlaylistRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -53,8 +57,7 @@ class AudioViewModel @Inject constructor(
     var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
 
-    private val _currentSelectedAudio =
-        mutableStateOf(audioDummy)
+    private val _currentSelectedAudio = mutableStateOf(audioDummy)
     val currentSelectedAudio: Song get() = _currentSelectedAudio.value
 
     private val _audioList = mutableStateOf<List<Song>>(emptyList())
@@ -62,6 +65,12 @@ class AudioViewModel @Inject constructor(
 
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _playlists = mutableStateOf<List<PlaylistData>>(emptyList())
+    val playlists: List<PlaylistData> get() = _playlists.value
+
+    private val _selectedPlaylist = mutableStateOf<Playlist?>(null)
+    val selectedPlaylist: Playlist? get() = _selectedPlaylist.value
 
     init {
         loadAudioData()
@@ -71,8 +80,10 @@ class AudioViewModel @Inject constructor(
     private fun loadAudioData() {
         viewModelScope.launch {
             try {
-                val songs = repository.getAudioData()
+                val songs = audioRepo.getAudioData()
+                val playlist = playlistRepo.getPlaylists()
                 _audioList.value = songs
+                _playlists.value = playlist
                 _uiState.value = UiState.Ready
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -80,9 +91,37 @@ class AudioViewModel @Inject constructor(
         }
     }
 
+    fun playPlaylist(id: Long){
+        viewModelScope.launch {
+            try{
+                val playlist = playlistRepo.getPlaylistById(id)
+                _selectedPlaylist.value = playlist
+
+                songServiceHandler.setMediaItemList(emptyList())
+                playlist.songs.forEach{song ->
+                    val mediaItem = createMediaItem(song)
+                    songServiceHandler.addMediaItem(song.id, mediaItem)
+                }
+            }catch (e: Exception){
+                Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
 
     private fun setMediaItems() {
         Log.d("AudioViewModel", "setMediaItems: Not loading all songs at once")
+    }
+
+    private fun createMediaItem(song: Song): MediaItem{
+       return  MediaItem.Builder()
+            .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
+            .setMediaMetadata(
+                MediaMetadata.Builder().setTitle(song.title)
+                    .setArtist(song.author).setExtras(Bundle().apply {
+                        putLong("songId", song.id)
+                    }).build()
+            ).build()
     }
 
     fun playSong(songId: Long) {
@@ -93,21 +132,8 @@ class AudioViewModel @Inject constructor(
                 if (selectedSong != null) {
                     _currentSelectedAudio.value = selectedSong
 
-                    // Create a media item for this song
-                    val mediaItem = MediaItem.Builder()
-                        .setUri("http://${Constants.BASE_URL}/api/song/stream/${songId}".toUri())
-                        .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(selectedSong.title)
-                                .setArtist(selectedSong.author)
-                                .setExtras(Bundle().apply {
-                                    putLong("songId", songId)
-                                })
-                                .build()
-                        )
-                        .build()
+                    val mediaItem = createMediaItem(selectedSong)
 
-                    // Add this single item to the player
                     songServiceHandler.addMediaItem(songId, mediaItem)
                     songServiceHandler.playStreamingAudio(songId)
                 }
@@ -136,13 +162,10 @@ class AudioViewModel @Inject constructor(
                         "Seeking to position: $seekPositionMs ms (current progress: $progress)"
                     )
 
-                    // Temporarily update UI progress for better responsiveness
                     progress = uiEvents.position * 100f
 
-                    // Perform the actual seek
                     songServiceHandler.onPlayerEvents(
-                        PlayerEvent.SeekTo,
-                        seekPosition = seekPositionMs
+                        PlayerEvent.SeekTo, seekPosition = seekPositionMs
                     )
                 }
 
@@ -192,7 +215,7 @@ class AudioViewModel @Inject constructor(
     fun likeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if (repository.likeSong(id) == 200) _currentSelectedAudio.value =
+                if (audioRepo.likeSong(id) == 200) _currentSelectedAudio.value =
                     _currentSelectedAudio.value.copy(isLiked = true)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = true) else song
@@ -206,7 +229,7 @@ class AudioViewModel @Inject constructor(
     fun unlikeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if (repository.unlikeSong(id) == 200) _currentSelectedAudio.value =
+                if (audioRepo.unlikeSong(id) == 200) _currentSelectedAudio.value =
                     _currentSelectedAudio.value.copy(isLiked = false)
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = false) else song
@@ -235,7 +258,7 @@ class AudioViewModel @Inject constructor(
     fun refreshAudioData() {
         viewModelScope.launch {
             try {
-                val songs = repository.getAudioData()
+                val songs = audioRepo.getAudioData()
                 _audioList.value = songs
                 setMediaItems()
             } catch (e: Exception) {

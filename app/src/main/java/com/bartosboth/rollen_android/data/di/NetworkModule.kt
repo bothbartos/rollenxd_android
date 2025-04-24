@@ -4,6 +4,7 @@ import android.content.Context
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.network.AuthInterceptor
 import com.bartosboth.rollen_android.data.network.AuthAPI
+import com.bartosboth.rollen_android.data.network.PlaylistAPI
 import com.bartosboth.rollen_android.data.network.SongAPI
 import com.bartosboth.rollen_android.data.network.UserDetailAPI
 import com.bartosboth.rollen_android.utils.Constants
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
     @Provides
     @Singleton
     fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
@@ -37,9 +39,6 @@ object NetworkModule {
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
-
-
-
 
     @Provides
     @Singleton
@@ -72,5 +71,16 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(UserDetailAPI::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlaylistAPI(okHttpClient: OkHttpClient): PlaylistAPI {
+        return Retrofit.Builder()
+            .baseUrl("http://${Constants.BASE_URL}/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(PlaylistAPI::class.java)
     }
 }
