@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
+import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
@@ -377,6 +378,62 @@ fun SongListItem(
 
             Text(
                 text = song.author,
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun PlaylistListItem(
+    playlist: PlaylistData,
+    isPlaying: Boolean,
+    onClick: () -> Unit
+) {
+    val cardColors = if (isPlaying) {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    } else {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+            .clickable { onClick() },
+        colors = cardColors
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            CoverImage(
+                coverBase64 = playlist.coverBase64,
+                songId = playlist.id,
+                size = 160.dp,
+                shadowElevation = 4.dp
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                text = playlist.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+
+            Text(
+                text = playlist.author,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1

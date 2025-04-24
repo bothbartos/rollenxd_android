@@ -44,6 +44,14 @@ private val audioDummy = Song(
     id = -1L
 )
 
+private val playlistDummy = Playlist(
+    id = -1L,
+    title = "No playlist selected",
+    author = "Unknown",
+    coverBase64 = "",
+    songs = emptyList(),
+)
+
 @HiltViewModel
 class AudioViewModel @Inject constructor(
     private val songServiceHandler: SongServiceHandler,
@@ -69,8 +77,8 @@ class AudioViewModel @Inject constructor(
     private val _playlists = mutableStateOf<List<PlaylistData>>(emptyList())
     val playlists: List<PlaylistData> get() = _playlists.value
 
-    private val _selectedPlaylist = mutableStateOf<Playlist?>(null)
-    val selectedPlaylist: Playlist? get() = _selectedPlaylist.value
+    private val _selectedPlaylist = mutableStateOf<Playlist>(playlistDummy)
+    val selectedPlaylist: Playlist get() = _selectedPlaylist.value
 
     init {
         loadAudioData()
@@ -92,6 +100,7 @@ class AudioViewModel @Inject constructor(
     }
 
     fun playPlaylist(id: Long){
+        Log.d("PLAYLIST_ID", "playPlaylist: $id")
         viewModelScope.launch {
             try{
                 val playlist = playlistRepo.getPlaylistById(id)
@@ -170,6 +179,7 @@ class AudioViewModel @Inject constructor(
                 }
 
                 is UiEvents.SelectedAudioChange -> playSong(audioList[uiEvents.index].id)
+                is UiEvents.SelectedPlaylistChange -> playPlaylist(playlists[uiEvents.index].id)
                 is UiEvents.UpdateProgress -> progress = uiEvents.newProgress
             }
         }
@@ -277,6 +287,7 @@ sealed class UiState {
 sealed class UiEvents {
     object PlayPause : UiEvents()
     data class SelectedAudioChange(val index: Int) : UiEvents()
+    data class SelectedPlaylistChange(val index: Int) : UiEvents()
     data class SeekTo(val position: Float) : UiEvents()
     object Next : UiEvents()
     object Previous : UiEvents()

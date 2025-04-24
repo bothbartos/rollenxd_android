@@ -1,5 +1,6 @@
 package com.bartosboth.rollen_android.ui.screens.main
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bartosboth.rollen_android.data.model.playlist.Playlist
+import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
+import com.bartosboth.rollen_android.ui.components.PlaylistListItem
 import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
@@ -38,9 +42,12 @@ fun MainScreen(
     progress: Float,
     isAudioPlaying: Boolean,
     currentPlayingAudio: Song,
+    currentPlayingPlaylist: Playlist,
     audioList: List<Song>,
+    playlists: List<PlaylistData>,
     onStart: () -> Unit,
-    onItemClick: (Int) -> Unit,
+    onSongClick: (Int) -> Unit,
+    onPlaylistClick: (Int) -> Unit,
     onLike: (Long) -> Unit,
     uiState: UiState
 ) {
@@ -105,7 +112,23 @@ fun MainScreen(
                                 SongListItem(
                                     song = song,
                                     isPlaying = song.id == currentPlayingAudio.id,
-                                    onClick = { onItemClick(index) }
+                                    onClick = { onSongClick(index) }
+                                )
+                            }
+                        }
+                        Text(
+                            text = "Playlists:",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 7.dp, top = 4.dp)
+                        )
+                        LazyRow {
+                            itemsIndexed(playlists) { index, playlist ->
+                                Log.d("PLAYLISTMAINSCREEN", "MainScreen: Playlist id: ${playlist.id} currentplaylist id ${currentPlayingPlaylist.id}")
+                                PlaylistListItem(
+                                    playlist = playlist,
+                                    isPlaying = playlist.id == currentPlayingPlaylist.id,
+                                    onClick = { onPlaylistClick(index) },
                                 )
                             }
                         }
