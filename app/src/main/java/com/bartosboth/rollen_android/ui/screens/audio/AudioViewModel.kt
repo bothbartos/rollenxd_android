@@ -107,10 +107,9 @@ class AudioViewModel @Inject constructor(
                 _selectedPlaylist.value = playlist
 
                 songServiceHandler.setMediaItemList(emptyList())
-                playlist.songs.forEach{song ->
-                    val mediaItem = createMediaItem(song)
-                    songServiceHandler.addMediaItem(song.id, mediaItem)
-                }
+                val mediaItem = playlist.songs.map { createMediaItem(it) }
+
+                songServiceHandler.setMediaItemList(mediaItems = mediaItem)
             }catch (e: Exception){
                 Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
                 e.printStackTrace()
@@ -156,8 +155,14 @@ class AudioViewModel @Inject constructor(
     fun onUiEvent(uiEvents: UiEvents) {
         viewModelScope.launch {
             when (uiEvents) {
-                UiEvents.Next -> songServiceHandler.onPlayerEvents(PlayerEvent.Next)
-                UiEvents.Previous -> songServiceHandler.onPlayerEvents(PlayerEvent.Previous)
+                UiEvents.Next -> {
+                    Log.d("NEXT", "NEXT BUTTON PRESSED")
+                    songServiceHandler.onPlayerEvents(PlayerEvent.Next)
+                }
+                UiEvents.Previous -> {
+                    Log.d("PREVIOUS", "PREVIOUS BUTTON PRESSED")
+                    songServiceHandler.onPlayerEvents(PlayerEvent.Previous)
+                }
                 is UiEvents.PlayPause -> {
                     songServiceHandler.onPlayerEvents(PlayerEvent.PlayPause)
                     isPlaying = !isPlaying
