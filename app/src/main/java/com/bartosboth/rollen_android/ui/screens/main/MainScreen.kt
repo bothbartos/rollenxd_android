@@ -47,7 +47,7 @@ fun MainScreen(
     playlists: List<PlaylistData>,
     onStart: () -> Unit,
     onSongClick: (Int) -> Unit,
-    onPlaylistClick: (Int) -> Unit,
+    onPlaylistClick: (Long) -> Unit,
     onLike: (Long) -> Unit,
     uiState: UiState
 ) {
@@ -129,13 +129,13 @@ fun MainScreen(
                                     PlaylistListItem(
                                         playlist = playlist.copy(author = "You"),
                                         isPlaying = playlist.id == currentPlayingPlaylist.id,
-                                        onClick = { onPlaylistClick(index) },
+                                        onClick = { onPlaylistClick(playlist.id) },
                                     )
                                 }else{
                                     PlaylistListItem(
                                         playlist = playlist,
                                         isPlaying = playlist.id == currentPlayingPlaylist.id,
-                                        onClick = { onPlaylistClick(index) },
+                                        onClick = { onPlaylistClick(playlist.id) },
                                     )
                                 }
                             }

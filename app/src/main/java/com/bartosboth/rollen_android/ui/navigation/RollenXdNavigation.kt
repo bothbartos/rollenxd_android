@@ -23,6 +23,8 @@ import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
+import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailScreen
+import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
@@ -84,7 +86,7 @@ fun RollenXdNavigation() {
                 audioList = audioViewModel.audioList,
                 playlists = audioViewModel.playlists,
                 onSongClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
-                onPlaylistClick = {audioViewModel.onUiEvent(UiEvents.SelectedPlaylistChange(it)) },
+                onPlaylistClick = {navController.navigate(PlaylistDetailScreen(playlistId = it))},
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                 onLike = { if (audioViewModel.currentSelectedAudio.isLiked) {
                     audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
@@ -93,6 +95,24 @@ fun RollenXdNavigation() {
                 }},
                 uiState = audioViewModel.uiState.collectAsState().value
             )
+        }
+
+        composable<PlaylistDetailScreen> {backstackEntry ->
+            val playlistId = backstackEntry.arguments?.getLong(PlaylistDetailScreen.playlistIdArg) ?: -1L
+            val playlistViewModel: PlaylistDetailViewModel = hiltViewModel()
+            val playlist = playlistViewModel.playlist.collectAsState().value
+            val playlistState = playlistViewModel.playlistState.collectAsState().value
+
+            LaunchedEffect(playlistId) {
+                playlistViewModel.getPlaylist(playlistId)
+            }
+
+            PlaylistDetailScreen(
+                playlist = playlist,
+                playlistState = playlistState,
+                onBackClick = { navController.popBackStack() }
+            )
+
         }
 
         composable<PlayerScreen> {
