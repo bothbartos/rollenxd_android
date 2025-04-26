@@ -36,6 +36,7 @@ fun RollenXdNavigation() {
     val context = LocalContext.current
     val audioViewModel: AudioViewModel = hiltViewModel()
     val userDetailViewModel: UserDetailViewModel = hiltViewModel()
+    val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
@@ -74,7 +75,6 @@ fun RollenXdNavigation() {
         }
 
         composable<MainScreen> {
-            val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
 
             MainScreen(
                 userDetail = userDetails,
@@ -104,14 +104,39 @@ fun RollenXdNavigation() {
             val playlistState = playlistViewModel.playlistState.collectAsState().value
 
             LaunchedEffect(playlistId) {
-                playlistViewModel.getPlaylist(playlistId)
+                if (playlistId != -1L) {
+                    playlistViewModel.getPlaylist(playlistId)
+                }
             }
 
             PlaylistDetailScreen(
                 playlist = playlist,
                 playlistState = playlistState,
-                onBackClick = { navController.popBackStack() }
-            )
+                onBackClick = { navController.popBackStack() },
+                progress = audioViewModel.progress,
+                isAudioPlaying = audioViewModel.isPlaying,
+                currentPlayingAudio = audioViewModel.currentSelectedAudio,
+                onCurrentSongLike = { if (audioViewModel.currentSelectedAudio.isLiked) {
+                    audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
+                } else {
+                    audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
+                }},
+                onSongLike = {
+                    if(it.isLiked){
+                        audioViewModel.unlikeSong(it.id)
+                        playlistViewModel.getPlaylist(playlistId)
+                    }else{
+                        audioViewModel.likeSong(it.id)
+                        playlistViewModel.getPlaylist(playlistId)
+                    }
+                },
+                playPlaylist = { if(audioViewModel.selectedPlaylist.id == it) audioViewModel
+                    .onUiEvent(UiEvents.PlayPause)
+                    else audioViewModel.playPlaylist(it) },
+                userDetail = userDetails,
+                onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                navController = navController
+                )
 
         }
 

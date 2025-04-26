@@ -17,31 +17,22 @@ import javax.inject.Inject
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-        private val playlistId: Long = savedStateHandle.get<Long>(PlaylistDetailScreen.playlistIdArg) ?: -1L
 
-        private val _playlist = MutableStateFlow<Playlist>(
-            value = Playlist(
-                id = -1L,
-                title = "",
-                author = "",
-                coverBase64 = "",
-                songs = emptyList()
-            )
+    private val _playlist = MutableStateFlow<Playlist>(
+        value = Playlist(
+            id = -1L,
+            title = "",
+            author = "",
+            coverBase64 = "",
+            songs = emptyList()
         )
+    )
     val playlist: StateFlow<Playlist> = _playlist
 
-    val _playlistState = MutableStateFlow<PlaylistState>(PlaylistState.Idle)
+    private val _playlistState = MutableStateFlow<PlaylistState>(PlaylistState.Idle)
     val playlistState = _playlistState.asStateFlow()
-
-    init{
-        if(playlistId != -1L){
-            getPlaylist(playlistId)
-        }
-    }
-
 
     fun getPlaylist(id: Long){
         viewModelScope.launch {

@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -160,6 +161,7 @@ fun ScreenContainer(content: @Composable () -> Unit) {
 
 @Composable
 fun CoverImage(
+    modifier: Modifier = Modifier,
     coverBase64: String,
     songId: Long,
     size: Dp,
@@ -167,20 +169,31 @@ fun CoverImage(
     shadowElevation: Dp = 0.dp
 ) {
     Surface(
-        modifier = Modifier.size(size),
+        modifier = modifier.size(size),
         shape = shape,
         shadowElevation = shadowElevation
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(convertBase64ToByteArr(coverBase64))
-                .memoryCacheKey(songId.toString())
-                .placeholderMemoryCacheKey(songId.toString())
-                .build(),
-            contentDescription = "Cover",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        val isPreview = LocalInspectionMode.current
+
+        if (isPreview) {
+            // Use a simple Box with a color for preview
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.DarkGray)
+            )
+        } else {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(convertBase64ToByteArr(coverBase64))
+                    .memoryCacheKey(songId.toString())
+                    .placeholderMemoryCacheKey(songId.toString())
+                    .build(),
+                contentDescription = "Cover",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -235,12 +248,13 @@ fun PlayPauseButton(
 
 @Composable
 fun LargePlayPauseButton(
+    modifier: Modifier = Modifier,
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
     IconButton(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .size(64.dp)
             .background(
                 color = MaterialTheme.colorScheme.primary,
