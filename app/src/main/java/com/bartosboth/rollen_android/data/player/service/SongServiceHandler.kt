@@ -99,7 +99,6 @@ class SongServiceHandler @Inject constructor(
     @OptIn(UnstableApi::class)
     fun playStreamingAudio(songId: Long) {
         try {
-            // Check if we already have this media item
             if (mediaItemsMap.containsKey(songId)) {
                 val index = findMediaItemIndex(songId)
                 if (index != -1) {
@@ -110,7 +109,6 @@ class SongServiceHandler @Inject constructor(
                 }
             }
 
-            // Otherwise create a new media item
             val audioUri = "http://${Constants.BASE_URL}/api/song/stream/$songId".toUri()
             Log.d("SongServiceHandler", "Attempting to stream from: $audioUri")
 
@@ -154,7 +152,6 @@ class SongServiceHandler @Inject constructor(
                 if (exoPlayer.hasPreviousMediaItem()) {
                     Log.d("SongServiceHandler", "Previous button pressed, playing previous song")
                     exoPlayer.seekToPreviousMediaItem()
-                    // Force a state update
                     val metadata = exoPlayer.currentMediaItem?.mediaMetadata
                     val extras = metadata?.extras
                     val songId = extras?.getLong("songId")
@@ -169,25 +166,10 @@ class SongServiceHandler @Inject constructor(
             PlayerEvent.PlayPause -> playOrPause()
             PlayerEvent.SeekTo -> {
                 Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
-                val wasPlaying = exoPlayer.isPlaying
-                val currentPosition = exoPlayer.currentPosition
-                val isSeekingBackward = seekPosition < currentPosition
-
-                Log.d("SongServiceHandler", "Current position: $currentPosition, Seeking ${if(isSeekingBackward) "backward" else "forward"}")
-
                 try {
-                    if (isSeekingBackward) {
-                        val playWhenReady = exoPlayer.playWhenReady
-                        exoPlayer.playWhenReady = false
 
                         exoPlayer.seekTo(seekPosition)
-
-                        delay(200)
-
-                        exoPlayer.playWhenReady = playWhenReady
-                    } else {
                         exoPlayer.seekTo(seekPosition)
-                    }
                 } catch (e: Exception) {
                     Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
 
