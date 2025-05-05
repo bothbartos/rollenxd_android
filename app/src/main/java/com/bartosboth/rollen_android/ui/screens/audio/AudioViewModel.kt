@@ -98,7 +98,7 @@ class AudioViewModel @Inject constructor(
                     id = 0L,
                     title = "Liked Songs",
                     author = "You",
-                    coverBase64 = "",
+                    coverBase64 = Constants.LIKED_SONG_BASE64,
                 )
                 _audioList.value = songs
                 _likedSongs.value = likedSongs
