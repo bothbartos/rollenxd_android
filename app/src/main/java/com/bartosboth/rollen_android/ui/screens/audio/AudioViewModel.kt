@@ -127,12 +127,45 @@ class AudioViewModel @Inject constructor(
                 val mediaItem = playlist.songs.map { createMediaItem(it) }
 
                 songServiceHandler.setMediaItemList(mediaItems = mediaItem)
+                songServiceHandler.play()
             }catch (e: Exception){
                 Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
                 e.printStackTrace()
             }
         }
     }
+
+    fun playPlaylistSong(songId: Long, playlistId: Long){
+        viewModelScope.launch {
+            try {
+                if(playlistId != selectedPlaylist.id){
+                    val playlist = playlistRepo.getPlaylistById(playlistId)
+                    val song = playlist.songs.find { it.id == songId }
+
+                    song?.let{
+                        _currentSelectedAudio.value = it
+                    }
+                    _selectedPlaylist.value = playlist
+                    songServiceHandler.setMediaItemList(emptyList())
+                    val mediaItem = playlist.songs.map { createMediaItem(it) }
+
+                    songServiceHandler.setMediaItemList(mediaItems = mediaItem)
+                    songServiceHandler.play()
+                }else{
+                    val song = selectedPlaylist.songs.find { it.id == songId }
+                    song?.let{
+                        _currentSelectedAudio.value = it
+                    }
+                    songServiceHandler.playStreamingAudio(songId)
+                }
+
+            }catch (e: Exception){
+                Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun createMediaItem(song: Song): MediaItem{
        return  MediaItem.Builder()
             .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())

@@ -135,6 +135,9 @@ fun RollenXdNavigation() {
                     else audioViewModel.playPlaylist(it) },
                 userDetail = userDetails,
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                onPlaylistSongPlay = { songId, playlistId ->
+                    audioViewModel.playPlaylistSong(songId, playlistId)
+                },
                 navController = navController
                 )
 
