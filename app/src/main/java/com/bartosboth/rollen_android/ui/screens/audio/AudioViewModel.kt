@@ -116,20 +116,14 @@ class AudioViewModel @Inject constructor(
             try {
                 var playlist =
                     when (id) {
-                        0L -> {
-                            Playlist(
+                        0L -> Playlist(
                                 id = 0L,
                                 title = "Liked Songs",
                                 author = "You",
                                 coverBase64 = Constants.LIKED_SONG_BASE64,
                                 songs = likedSongs
                             )
-                        }
-
-                        else -> {
-                            playlistRepo.getPlaylistById(id)
-
-                        }
+                        else -> playlistRepo.getPlaylistById(id)
                     }
                 _selectedPlaylist.value = playlist
                 songServiceHandler.setMediaItemList(emptyList())
@@ -147,26 +141,38 @@ class AudioViewModel @Inject constructor(
     fun playPlaylistSong(songId: Long, playlistId: Long) {
         viewModelScope.launch {
             try {
-                if (playlistId != selectedPlaylist.id) {
-                    val playlist = playlistRepo.getPlaylistById(playlistId)
-                    val song = playlist.songs.find { it.id == songId }
-
-                    song?.let {
-                        _currentSelectedAudio.value = it
+                val playlist = when(playlistId) {
+                    0L -> Playlist(
+                        id = 0L,
+                        title = "Liked Songs",
+                        author = "You",
+                        coverBase64 = Constants.LIKED_SONG_BASE64,
+                        songs = likedSongs
+                    )
+                    else -> {
+                        if(_selectedPlaylist.value.id != playlistId){
+                            playlistRepo.getPlaylistById(playlistId)
+                        } else {
+                            _selectedPlaylist.value
+                        }
                     }
-                    _selectedPlaylist.value = playlist
-                    songServiceHandler.setMediaItemList(emptyList())
-                    val mediaItem = playlist.songs.map { createMediaItem(it) }
-
-                    songServiceHandler.setMediaItemList(mediaItems = mediaItem)
-                    songServiceHandler.play()
-                } else {
-                    val song = selectedPlaylist.songs.find { it.id == songId }
-                    song?.let {
-                        _currentSelectedAudio.value = it
-                    }
-                    songServiceHandler.playStreamingAudio(songId)
                 }
+
+                _selectedPlaylist.value = playlist
+                val mediaItems = playlist.songs.map { createMediaItem(it) }
+
+                songServiceHandler.setMediaItemList(emptyList())
+
+                songServiceHandler.setMediaItemList(mediaItems)
+
+                val songIndex = playlist.songs.indexOfFirst { it.id == songId }
+                if (songIndex != -1) {
+                    _currentSelectedAudio.value = playlist.songs[songIndex]
+                    songServiceHandler.playStreamingAudio(songId)
+                    songServiceHandler.play()
+                }
+
+
 
             } catch (e: Exception) {
                 Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
@@ -189,6 +195,7 @@ class AudioViewModel @Inject constructor(
     fun playSong(songId: Long) {
         viewModelScope.launch {
             try {
+                _selectedPlaylist.value = playlistDummy
                 val selectedSong = audioList.find { it.id == songId }
                 Log.d("SELECTEDSONG", "playSong: selected song ${selectedSong?.id} ")
                 if (selectedSong != null) {
@@ -286,8 +293,11 @@ class AudioViewModel @Inject constructor(
     fun likeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if (audioRepo.likeSong(id) == 200) _currentSelectedAudio.value =
-                    _currentSelectedAudio.value.copy(isLiked = true)
+                audioRepo.likeSong(id)
+                if (_currentSelectedAudio.value.id == id) {
+                    _currentSelectedAudio.value =
+                        _currentSelectedAudio.value.copy(isLiked = true)
+                }
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = true) else song
                 }
@@ -300,8 +310,11 @@ class AudioViewModel @Inject constructor(
     fun unlikeSong(id: Long) {
         viewModelScope.launch {
             try {
-                if (audioRepo.unlikeSong(id) == 200) _currentSelectedAudio.value =
-                    _currentSelectedAudio.value.copy(isLiked = false)
+                audioRepo.unlikeSong(id)
+                if (_currentSelectedAudio.value.id == id) {
+                    _currentSelectedAudio.value =
+                        _currentSelectedAudio.value.copy(isLiked = false)
+                }
                 _audioList.value = _audioList.value.map { song ->
                     if (song.id == id) song.copy(isLiked = false) else song
                 }

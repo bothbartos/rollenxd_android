@@ -184,7 +184,7 @@ fun PlaylistDetailScreen(
                                 PlaylistSongRow(
                                     surfaceColour = surfaceColour,
                                     song = song,
-                                    playlist = playlist,
+                                    playlistId = playlist.id,
                                     onSongLike = onSongLike,
                                     onPlaylistSongPlay = onPlaylistSongPlay
                                 )
@@ -201,7 +201,7 @@ fun PlaylistDetailScreen(
 fun PlaylistSongRow(
     surfaceColour: Color,
     song: Song,
-    playlist: Playlist,
+    playlistId: Long,
     onSongLike: (Song) -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
     ){
@@ -216,7 +216,7 @@ fun PlaylistSongRow(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(8.dp)
-                .clickable { onPlaylistSongPlay(song.id, playlist.id) }
+                .clickable { onPlaylistSongPlay(song.id, playlistId) }
         ) {
             CoverImage(
                 coverBase64 = song.coverBase64,
@@ -366,7 +366,7 @@ fun PlaylistDetailScreenPreview(
                     PlaylistSongRow(
                         surfaceColour = surfaceColour,
                         song = song,
-                        playlist = playlist,
+                        playlistId = playlist.id,
                         onSongLike = {},
                         onPlaylistSongPlay = { _, _ -> }
                     )
