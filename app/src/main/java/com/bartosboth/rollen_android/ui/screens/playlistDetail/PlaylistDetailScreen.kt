@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -169,7 +170,7 @@ fun PlaylistDetailScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "No liked songs",
+                                        text = "No songs",
                                         style = MaterialTheme.typography.displaySmall,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
@@ -180,49 +181,13 @@ fun PlaylistDetailScreen(
                             itemsIndexed(playlist.songs) { index, song ->
                                 val surfaceColour =
                                     if (currentPlayingAudio.id == song.id) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = surfaceColour,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .clickable { onPlaylistSongPlay(song.id, playlist.id) }
-                                    ) {
-                                        CoverImage(
-                                            coverBase64 = song.coverBase64,
-                                            songId = song.id,
-                                            size = 50.dp,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                        Column(
-                                            modifier = Modifier
-                                                .padding(16.dp)
-                                                .weight(1f)
-                                        ) {
-                                            Text(
-                                                text = song.title,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 1
-                                            )
-                                            Text(
-                                                text = song.author,
-                                                style = MaterialTheme.typography.titleSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1
-                                            )
-                                        }
-                                        LikeButton(
-                                            isLiked = song.isLiked,
-                                            onClick = { onSongLike(song) }
-                                        )
-                                    }
-                                }
+                                PlaylistSongRow(
+                                    surfaceColour = surfaceColour,
+                                    song = song,
+                                    playlist = playlist,
+                                    onSongLike = onSongLike,
+                                    onPlaylistSongPlay = onPlaylistSongPlay
+                                )
                             }
                         }
                     }
@@ -230,7 +195,59 @@ fun PlaylistDetailScreen(
             }
         }
     }
+}
 
+@Composable
+fun PlaylistSongRow(
+    surfaceColour: Color,
+    song: Song,
+    playlist: Playlist,
+    onSongLike: (Song) -> Unit,
+    onPlaylistSongPlay: (Long, Long) -> Unit,
+    ){
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = surfaceColour,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable { onPlaylistSongPlay(song.id, playlist.id) }
+        ) {
+            CoverImage(
+                coverBase64 = song.coverBase64,
+                songId = song.id,
+                size = 50.dp,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = song.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = song.author,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+            LikeButton(
+                isLiked = song.isLiked,
+                onClick = { onSongLike(song) }
+            )
+        }
+    }
 }
 
 @Preview
@@ -279,9 +296,7 @@ fun PlaylistDetailScreenPreview(
         ) {
 
         LazyColumn(
-            modifier = Modifier
-                .padding(0.dp)
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             item {
@@ -305,7 +320,11 @@ fun PlaylistDetailScreenPreview(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
-                        modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 16.dp)
+                        modifier = Modifier.padding(
+                            start = 30.dp,
+                            end = 30.dp,
+                            bottom = 16.dp
+                        )
                     ) {
                         Text(
                             text = playlist.title,
@@ -327,47 +346,30 @@ fun PlaylistDetailScreenPreview(
                 }
             }
 
-            itemsIndexed(playlist.songs) { index, song ->
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(8.dp)
+            if (playlist.songs.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        CoverImage(
-                            coverBase64 = song.coverBase64,
-                            songId = song.id,
-                            size = 50.dp,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(1f)
-                        ) {
-                            Text(
-                                text = song.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = song.author,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
-                            )
-                        }
-                        LikeButton(
-                            isLiked = song.isLiked,
-                            onClick = { }
+                        Text(
+                            text = "No songs",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     }
+                }
+            } else {
+                itemsIndexed(playlist.songs) { index, song ->
+                    val surfaceColour = MaterialTheme.colorScheme.surfaceVariant
+                    PlaylistSongRow(
+                        surfaceColour = surfaceColour,
+                        song = song,
+                        playlist = playlist,
+                        onSongLike = {},
+                        onPlaylistSongPlay = { _, _ -> }
+                    )
                 }
             }
         }
