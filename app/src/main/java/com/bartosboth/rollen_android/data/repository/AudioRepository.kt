@@ -25,18 +25,6 @@ class AudioRepository @Inject constructor(
         response.body()!!
     }
 
-    suspend fun streamAudio(id: Long): ResponseBody = withContext(Dispatchers.IO) {
-        val response = songApi.streamAudio(id)
-
-        if (response.isSuccessful) {
-           response.body() ?: throw IllegalStateException("Response body is null")
-        } else {
-            Log.e("AudioRepository", "Error streaming audio: ${response.code()} - ${response.message()}")
-            throw HttpException(response)
-        }
-        response.body()!!
-    }
-
     suspend fun likeSong(id: Long): Int = withContext(Dispatchers.IO) {
 
         val response = songApi.likeSong(id)

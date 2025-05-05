@@ -114,15 +114,24 @@ class AudioViewModel @Inject constructor(
         Log.d("PLAYLIST_ID", "playPlaylist: $id")
         viewModelScope.launch {
             try{
-                val playlist = if(id == 0L) Playlist(
-                    id = 0L,
-                    title = "Liked Songs",
-                    author = "You",
-                    coverBase64 = "",
-                    songs = likedSongs
-                ) else playlistRepo.getPlaylistById(id)
-                _selectedPlaylist.value = playlist
+                var playlist =
+                    when (id) {
+                    0L -> {
+                        Playlist(
+                            id = 0L,
+                            title = "Liked Songs",
+                            author = "You",
+                            coverBase64 = "",
+                            songs = likedSongs
+                        )
+                    }
 
+                    else -> {
+                        playlistRepo.getPlaylistById(id)
+
+                    }
+                }
+                _selectedPlaylist.value = playlist
                 songServiceHandler.setMediaItemList(emptyList())
                 val mediaItem = playlist.songs.map { createMediaItem(it) }
 

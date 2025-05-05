@@ -1,12 +1,12 @@
 package com.bartosboth.rollen_android.ui.screens.playlistDetail
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
+import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
+import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.PlaylistRepository
-import com.bartosboth.rollen_android.ui.navigation.PlaylistDetailScreen
-import com.bartosboth.rollen_android.ui.screens.login.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,17 +38,33 @@ class PlaylistDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _playlistState.value = PlaylistState.Loading
+                if(id == 0L){
+                    val likedSongs = playlistRepository.getLikedSongs()
+                    likedSongs.forEach { it.isLiked = true }
+                    likedSongs.let{
+                        _playlist.value = Playlist(
+                            id = 0L,
+                            title = "Liked Songs",
+                            author = "You",
+                            coverBase64 = "",
+                            songs = likedSongs
+                        )
+                        _playlistState.value = PlaylistState.Success
+                    }
 
-                val response = playlistRepository.getPlaylistById(id)
-                response.let {
-                    _playlist.value = it
-                    _playlistState.value = PlaylistState.Success
+                }else{
+                    val response = playlistRepository.getPlaylistById(id)
+                    response.let {
+                        _playlist.value = it
+                        _playlistState.value = PlaylistState.Success
+                    }
                 }
             } catch (e: Exception) {
                 _playlistState.value = PlaylistState.Error("Loading error: ${e.message}")
             }
         }
     }
+
 }
 
 sealed class PlaylistState {

@@ -15,10 +15,6 @@ interface SongAPI {
     @GET("api/song/all")
     suspend fun getSongs(): Response<List<Song>>
 
-    @Streaming
-    @GET("api/song/stream/{id}")
-    suspend fun streamAudio(@Path("id") id: Long): Response<ResponseBody>
-
     @POST("api/song/like/id/{id}")
     suspend fun likeSong(@Path("id") id: Long): Response<ResponseBody>
 
