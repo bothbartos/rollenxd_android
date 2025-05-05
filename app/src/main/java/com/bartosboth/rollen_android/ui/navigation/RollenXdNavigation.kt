@@ -23,6 +23,8 @@ import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
+import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailScreen
+import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
@@ -34,6 +36,7 @@ fun RollenXdNavigation() {
     val context = LocalContext.current
     val audioViewModel: AudioViewModel = hiltViewModel()
     val userDetailViewModel: UserDetailViewModel = hiltViewModel()
+    val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
@@ -72,7 +75,6 @@ fun RollenXdNavigation() {
         }
 
         composable<MainScreen> {
-            val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
 
             MainScreen(
                 userDetail = userDetails,
@@ -80,16 +82,72 @@ fun RollenXdNavigation() {
                 progress = audioViewModel.progress,
                 isAudioPlaying = audioViewModel.isPlaying,
                 currentPlayingAudio = audioViewModel.currentSelectedAudio,
+                currentPlayingPlaylist = audioViewModel.selectedPlaylist,
                 audioList = audioViewModel.audioList,
-                onItemClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
+                playlists = audioViewModel.playlists,
+                onSongClick = { audioViewModel.onUiEvent(UiEvents.SelectedAudioChange(it)) },
+                onPlaylistClick = { navController.navigate(PlaylistDetailScreen(playlistId = it)) },
                 onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
-                onLike = { if (audioViewModel.currentSelectedAudio.isLiked) {
-                    audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
-                } else {
-                    audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
-                }},
+                onLike = {
+                    if (audioViewModel.currentSelectedAudio.isLiked) {
+                        audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
+                    } else {
+                        audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
+                    }
+                },
                 uiState = audioViewModel.uiState.collectAsState().value
             )
+        }
+
+        composable<PlaylistDetailScreen> { backstackEntry ->
+            val playlistId =
+                backstackEntry.arguments?.getLong(PlaylistDetailScreen.playlistIdArg) ?: -1L
+            val playlistViewModel: PlaylistDetailViewModel = hiltViewModel()
+            val playlist = playlistViewModel.playlist.collectAsState().value
+            val playlistState = playlistViewModel.playlistState.collectAsState().value
+
+            LaunchedEffect(playlistId) {
+                if (playlistId != -1L) {
+                    playlistViewModel.getPlaylist(playlistId)
+                }
+            }
+
+            PlaylistDetailScreen(
+                playlist = playlist,
+                playlistState = playlistState,
+                onBackClick = { navController.popBackStack() },
+                progress = audioViewModel.progress,
+                isAudioPlaying = audioViewModel.isPlaying,
+                currentPlayingAudio = audioViewModel.currentSelectedAudio,
+                onCurrentSongLike = {
+                    if (audioViewModel.currentSelectedAudio.isLiked) {
+                        audioViewModel.unlikeSong(audioViewModel.currentSelectedAudio.id)
+                    } else {
+                        audioViewModel.likeSong(audioViewModel.currentSelectedAudio.id)
+                    }
+                },
+                onSongLike = {
+                    if (it.isLiked) {
+                        audioViewModel.unlikeSong(it.id)
+                        playlistViewModel.getPlaylist(playlistId)
+                    } else {
+                        audioViewModel.likeSong(it.id)
+                        playlistViewModel.getPlaylist(playlistId)
+                    }
+                },
+                playPlaylist = {
+                    if (audioViewModel.selectedPlaylist.id == it) audioViewModel
+                        .onUiEvent(UiEvents.PlayPause)
+                    else audioViewModel.playPlaylist(it)
+                },
+                userDetail = userDetails,
+                onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                onPlaylistSongPlay = { songId, playlistId ->
+                    audioViewModel.playPlaylistSong(songId, playlistId)
+                },
+                navController = navController
+            )
+
         }
 
         composable<PlayerScreen> {
@@ -107,7 +165,7 @@ fun RollenXdNavigation() {
 
             LaunchedEffect(authState) {
                 if (authState is AuthState.LoggedOut) {
-                    if(audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
+                    if (audioViewModel.isPlaying) audioViewModel.onUiEvent(UiEvents.PlayPause)
                     audioViewModel.resetState()
                     userDetailViewModel.resetState()
                     navController.navigate(LoginScreen) {

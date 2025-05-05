@@ -42,34 +42,39 @@ class SongServiceHandler @Inject constructor(
     }
 
     fun setMediaItemList(mediaItems: List<MediaItem>) {
-        exoPlayer.clearMediaItems()
+        exoPlayer.setMediaItems(mediaItems)
+        exoPlayer.prepare()
+    }
+
+    fun play(){
+        exoPlayer.play()
+
     }
 
     fun addMediaItem(songId: Long, mediaItem: MediaItem) {
         mediaItemsMap[songId] = mediaItem
 
-        // If this is the first song, set it directly
+        if (findMediaItemIndex(songId) == -1) {
+            exoPlayer.addMediaItem(mediaItem)
+            Log.d("SongServiceHandler", "Added media item to playlist, count: ${exoPlayer.mediaItemCount}")
+        }
         if (exoPlayer.mediaItemCount == 0) {
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
             exoPlayer.play()
         } else {
-            // Check if we're currently playing this song
             val currentSongId = exoPlayer.currentMediaItem?.mediaMetadata?.extras?.getLong("songId")
             if (currentSongId == songId) {
-                // Already playing this song, just toggle play state
                 if (exoPlayer.isPlaying) {
                     exoPlayer.pause()
                 } else {
                     exoPlayer.play()
                 }
             } else {
-                // Add to playlist if not already there
                 if (!mediaItemsMap.containsKey(songId)) {
                     exoPlayer.addMediaItem(mediaItem)
                 }
 
-                // Find the index of this song in the current playlist
                 val index = findMediaItemIndex(songId)
                 if (index != -1) {
                     exoPlayer.seekTo(index, 0)
@@ -94,7 +99,6 @@ class SongServiceHandler @Inject constructor(
     @OptIn(UnstableApi::class)
     fun playStreamingAudio(songId: Long) {
         try {
-            // Check if we already have this media item
             if (mediaItemsMap.containsKey(songId)) {
                 val index = findMediaItemIndex(songId)
                 if (index != -1) {
@@ -105,7 +109,6 @@ class SongServiceHandler @Inject constructor(
                 }
             }
 
-            // Otherwise create a new media item
             val audioUri = "http://${Constants.BASE_URL}/api/song/stream/$songId".toUri()
             Log.d("SongServiceHandler", "Attempting to stream from: $audioUri")
 
@@ -127,30 +130,46 @@ class SongServiceHandler @Inject constructor(
         seekPosition: Long = 0
     ) {
         when (playerEvent) {
-            PlayerEvent.Next -> exoPlayer.seekToNextMediaItem()
-            PlayerEvent.Previous -> exoPlayer.seekToPreviousMediaItem()
+            PlayerEvent.Next -> {
+                Log.d("SongServiceHandler", "Next button pressed, hasNext: ${exoPlayer.hasNextMediaItem()}")
+                Log.d("SongServiceHandler", "isCommandAvailable(NEXT): ${exoPlayer.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)}")
+
+                if (exoPlayer.hasNextMediaItem() && exoPlayer.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)) {
+                    exoPlayer.seekToNextMediaItem()
+                    val metadata = exoPlayer.currentMediaItem?.mediaMetadata
+                    val extras = metadata?.extras
+                    val songId = extras?.getLong("songId")
+                    _audioState.value = AudioState.Current(
+                        mediaItemIndex = exoPlayer.currentMediaItemIndex,
+                        songId = songId,
+                        title = metadata?.title?.toString(),
+                        artist = metadata?.artist?.toString()
+                    )
+                }
+            }
+            PlayerEvent.Previous -> {
+                Log.d("SongServiceHandler", "Previous button pressed")
+                if (exoPlayer.hasPreviousMediaItem()) {
+                    Log.d("SongServiceHandler", "Previous button pressed, playing previous song")
+                    exoPlayer.seekToPreviousMediaItem()
+                    val metadata = exoPlayer.currentMediaItem?.mediaMetadata
+                    val extras = metadata?.extras
+                    val songId = extras?.getLong("songId")
+                    _audioState.value = AudioState.Current(
+                        mediaItemIndex = exoPlayer.currentMediaItemIndex,
+                        songId = songId,
+                        title = metadata?.title?.toString(),
+                        artist = metadata?.artist?.toString()
+                    )
+                }
+            }
             PlayerEvent.PlayPause -> playOrPause()
             PlayerEvent.SeekTo -> {
                 Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
-                val wasPlaying = exoPlayer.isPlaying
-                val currentPosition = exoPlayer.currentPosition
-                val isSeekingBackward = seekPosition < currentPosition
-
-                Log.d("SongServiceHandler", "Current position: $currentPosition, Seeking ${if(isSeekingBackward) "backward" else "forward"}")
-
                 try {
-                    if (isSeekingBackward) {
-                        val playWhenReady = exoPlayer.playWhenReady
-                        exoPlayer.playWhenReady = false
 
                         exoPlayer.seekTo(seekPosition)
-
-                        delay(200)
-
-                        exoPlayer.playWhenReady = playWhenReady
-                    } else {
                         exoPlayer.seekTo(seekPosition)
-                    }
                 } catch (e: Exception) {
                     Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
 
@@ -199,6 +218,8 @@ class SongServiceHandler @Inject constructor(
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        Log.d("SongServiceHandler", "onMediaItemTransition: reason=$reason")
+
         val metadata = exoPlayer.currentMediaItem?.mediaMetadata
         val extras = metadata?.extras
         val songId = extras?.getLong("songId")

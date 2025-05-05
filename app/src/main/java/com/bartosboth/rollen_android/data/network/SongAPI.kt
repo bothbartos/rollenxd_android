@@ -15,13 +15,12 @@ interface SongAPI {
     @GET("api/song/all")
     suspend fun getSongs(): Response<List<Song>>
 
-    @Streaming
-    @GET("api/song/stream/{id}")
-    suspend fun streamAudio(@Path("id") id: Long): Response<ResponseBody>
-
-    @POST("/api/song/like/id/{id}")
+    @POST("api/song/like/id/{id}")
     suspend fun likeSong(@Path("id") id: Long): Response<ResponseBody>
 
-    @DELETE("/api/song/unlike/id/{id}")
+    @DELETE("api/song/unlike/id/{id}")
     suspend fun unlikeSong(@Path("id") id: Long): Response<ResponseBody>
+
+    @GET("api/song/like/all")
+    suspend fun getLikedSongs(): Response<List<Song>>
 }

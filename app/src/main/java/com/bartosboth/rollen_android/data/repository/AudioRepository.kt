@@ -25,18 +25,6 @@ class AudioRepository @Inject constructor(
         response.body()!!
     }
 
-    suspend fun streamAudio(id: Long): ResponseBody = withContext(Dispatchers.IO) {
-        val response = songApi.streamAudio(id)
-
-        if (response.isSuccessful) {
-           response.body() ?: throw IllegalStateException("Response body is null")
-        } else {
-            Log.e("AudioRepository", "Error streaming audio: ${response.code()} - ${response.message()}")
-            throw HttpException(response)
-        }
-        response.body()!!
-    }
-
     suspend fun likeSong(id: Long): Int = withContext(Dispatchers.IO) {
 
         val response = songApi.likeSong(id)
@@ -60,5 +48,16 @@ class AudioRepository @Inject constructor(
             throw HttpException(response)
         }
         response.code()
+    }
+
+    suspend fun getLikedSongs(): List<Song> = withContext(Dispatchers.IO) {
+        val response = songApi.getLikedSongs()
+        if (response.isSuccessful) {
+            response.body() ?: throw IllegalStateException("Response body is null")
+        } else {
+            Log.e("AudioRepository", "Error getting liked songs: ${response.code()} - ${response.message()}")
+            throw HttpException(response)
+        }
+        response.body()!!
     }
 }

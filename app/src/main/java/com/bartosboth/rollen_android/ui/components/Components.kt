@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
+import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
@@ -159,6 +161,7 @@ fun ScreenContainer(content: @Composable () -> Unit) {
 
 @Composable
 fun CoverImage(
+    modifier: Modifier = Modifier,
     coverBase64: String,
     songId: Long,
     size: Dp,
@@ -166,20 +169,31 @@ fun CoverImage(
     shadowElevation: Dp = 0.dp
 ) {
     Surface(
-        modifier = Modifier.size(size),
+        modifier = modifier.size(size),
         shape = shape,
         shadowElevation = shadowElevation
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(convertBase64ToByteArr(coverBase64))
-                .memoryCacheKey(songId.toString())
-                .placeholderMemoryCacheKey(songId.toString())
-                .build(),
-            contentDescription = "Cover",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        val isPreview = LocalInspectionMode.current
+
+        if (isPreview) {
+            // Use a simple Box with a color for preview
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.DarkGray)
+            )
+        } else {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(convertBase64ToByteArr(coverBase64))
+                    .memoryCacheKey(songId.toString())
+                    .placeholderMemoryCacheKey(songId.toString())
+                    .build(),
+                contentDescription = "Cover",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -234,12 +248,13 @@ fun PlayPauseButton(
 
 @Composable
 fun LargePlayPauseButton(
+    modifier: Modifier = Modifier,
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
     IconButton(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .size(64.dp)
             .background(
                 color = MaterialTheme.colorScheme.primary,
@@ -377,6 +392,62 @@ fun SongListItem(
 
             Text(
                 text = song.author,
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun PlaylistListItem(
+    playlist: PlaylistData,
+    isPlaying: Boolean,
+    onClick: () -> Unit
+) {
+    val cardColors = if (isPlaying) {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    } else {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+            .clickable { onClick() },
+        colors = cardColors
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            CoverImage(
+                coverBase64 = playlist.coverBase64,
+                songId = playlist.id,
+                size = 160.dp,
+                shadowElevation = 4.dp
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                text = playlist.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+
+            Text(
+                text = playlist.author,
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
