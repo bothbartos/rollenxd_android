@@ -76,101 +76,153 @@ fun PlaylistDetailScreen(
         }
     ) { innerPadding ->
         Surface(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             color = MaterialTheme.colorScheme.surface
         ) {
-            if (playlistState is PlaylistState.Loading) {
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            when (playlistState) {
+                PlaylistState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-            }
-            else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .padding(15.dp)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CoverImage(
-                                coverBase64 = playlist.coverBase64,
-                                songId = playlist.id,
-                                size = 250.dp
-                            )
-                        }
-                    }
 
-                    item {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                PlaylistState.Idle -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is PlaylistState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = playlistState.message)
+                    }
+                }
+
+                PlaylistState.Success -> {
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        item {
                             Column(
-                                modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 16.dp)
-                            ) {
-                                Text(
-                                    text = playlist.title,
-                                    style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = playlist.author,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
-                            LargePlayPauseButton(
-                                modifier = Modifier.padding(end = 16.dp),
-                                isPlaying = isAudioPlaying
-                            ) { playPlaylist(playlist.id) }
-                        }
-                    }
-
-                    itemsIndexed(playlist.songs) { index, song ->
-                        val surfaceColour = if(currentPlayingAudio.id == song.id) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = surfaceColour,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(8.dp)
-                                    .clickable { onPlaylistSongPlay(song.id, playlist.id) }
+                                modifier = Modifier
+                                    .padding(15.dp)
+                                    .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 CoverImage(
-                                    coverBase64 = song.coverBase64,
-                                    songId = song.id,
-                                    size = 50.dp,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                    coverBase64 = playlist.coverBase64,
+                                    songId = playlist.id,
+                                    size = 250.dp
                                 )
+                            }
+                        }
+
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Column(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .weight(1f)
+                                    modifier = Modifier.padding(
+                                        start = 30.dp,
+                                        end = 30.dp,
+                                        bottom = 16.dp
+                                    )
                                 ) {
                                     Text(
-                                        text = song.title,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        text = playlist.title,
+                                        style = MaterialTheme.typography.displaySmall,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 1
                                     )
                                     Text(
-                                        text = song.author,
-                                        style = MaterialTheme.typography.titleSmall,
+                                        text = playlist.author,
+                                        style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1
                                     )
                                 }
-                                LikeButton(
-                                    isLiked = song.isLiked,
-                                    onClick = {onSongLike(song) }
-                                )
+                                LargePlayPauseButton(
+                                    modifier = Modifier.padding(end = 16.dp),
+                                    isPlaying = isAudioPlaying
+                                ) { playPlaylist(playlist.id) }
+                            }
+                        }
+
+                        if (playlist.songs.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "No liked songs",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        } else {
+                            itemsIndexed(playlist.songs) { index, song ->
+                                val surfaceColour =
+                                    if (currentPlayingAudio.id == song.id) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = surfaceColour,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .clickable { onPlaylistSongPlay(song.id, playlist.id) }
+                                    ) {
+                                        CoverImage(
+                                            coverBase64 = song.coverBase64,
+                                            songId = song.id,
+                                            size = 50.dp,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .padding(16.dp)
+                                                .weight(1f)
+                                        ) {
+                                            Text(
+                                                text = song.title,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                maxLines = 1
+                                            )
+                                            Text(
+                                                text = song.author,
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
+                                        LikeButton(
+                                            isLiked = song.isLiked,
+                                            onClick = { onSongLike(song) }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -183,136 +235,141 @@ fun PlaylistDetailScreen(
 
 @Preview
 @Composable
-fun PlaylistDetailScreenPreview(playlist: Playlist = Playlist(
-    id = 1L,
-    title = "Playlist",
-    author = "author",
-    coverBase64 = "",
-    songs = listOf(
-        Song(
-            title = "Song 1",
-            author = "author",
-            coverBase64 = "",
-            length = 10.0,
-            isLiked = false,
-            reShares = 1,
-            id = 1L
-        ),
-        Song(
-            title = "Song 2",
-            author = "author",
-            coverBase64 = "",
-            length = 10.0,
-            isLiked = false,
-            reShares = 1,
-            id = 2L
-        ),
-        Song(
-            title = "Song 3",
-            author = "author",
-            coverBase64 = "",
-            length = 10.0,
-            isLiked = false,
-            reShares = 1,
-            id = 3L
+fun PlaylistDetailScreenPreview(
+    playlist: Playlist = Playlist(
+        id = 1L,
+        title = "Playlist",
+        author = "author",
+        coverBase64 = "",
+        songs = listOf(
+            Song(
+                title = "Song 1",
+                author = "author",
+                coverBase64 = "",
+                length = 10.0,
+                isLiked = false,
+                reShares = 1,
+                id = 1L
+            ),
+            Song(
+                title = "Song 2",
+                author = "author",
+                coverBase64 = "",
+                length = 10.0,
+                isLiked = false,
+                reShares = 1,
+                id = 2L
+            ),
+            Song(
+                title = "Song 3",
+                author = "author",
+                coverBase64 = "",
+                length = 10.0,
+                isLiked = false,
+                reShares = 1,
+                id = 3L
+            )
         )
     )
-)
 ) {
-   Surface(
+    Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surface,
 
         ) {
 
-       LazyColumn(
-           modifier = Modifier
-               .padding(0.dp)
-               .fillMaxSize(),
-           contentPadding = PaddingValues(bottom = 16.dp)
-       ) {
-           item {
-               Column(
-                   modifier = Modifier
-                       .padding(15.dp)
-                       .fillMaxWidth(),
-                   horizontalAlignment = Alignment.CenterHorizontally
-               ) {
-                   CoverImage(
-                       coverBase64 = playlist.coverBase64,
-                       songId = playlist.id,
-                       size = 250.dp
-                   )
-               }
-           }
+        LazyColumn(
+            modifier = Modifier
+                .padding(0.dp)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CoverImage(
+                        coverBase64 = playlist.coverBase64,
+                        songId = playlist.id,
+                        size = 250.dp
+                    )
+                }
+            }
 
-           item {
-               Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
-                   Column(
-                       modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 16.dp)
-                   ) {
-                       Text(
-                           text = playlist.title,
-                           style = MaterialTheme.typography.displaySmall,
-                           fontWeight = FontWeight.Bold,
-                           maxLines = 1
-                       )
-                       Text(
-                           text = playlist.author,
-                           style = MaterialTheme.typography.titleMedium,
-                           color = MaterialTheme.colorScheme.onSurfaceVariant,
-                           maxLines = 1
-                       )
-                   }
-                   LargePlayPauseButton(
-                       modifier = Modifier.padding(end = 16.dp),
-                       isPlaying = false) { }
-               }
-           }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = playlist.title,
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = playlist.author,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                    LargePlayPauseButton(
+                        modifier = Modifier.padding(end = 16.dp),
+                        isPlaying = false
+                    ) { }
+                }
+            }
 
-           itemsIndexed(playlist.songs) { index, song ->
-               Surface(
-                   shape = RoundedCornerShape(8.dp),
-                   color = MaterialTheme.colorScheme.surfaceVariant,
-                   modifier = Modifier
-                       .fillMaxWidth()
-                       .padding(horizontal = 16.dp, vertical = 4.dp)
-               ) {
-                   Row(
-                       verticalAlignment = Alignment.CenterVertically,
-                       modifier = Modifier.padding(8.dp)
-                   ) {
-                       CoverImage(
-                           coverBase64 = song.coverBase64,
-                           songId = song.id,
-                           size = 50.dp,
-                           modifier = Modifier.padding(start = 8.dp)
-                       )
-                       Column(
-                           modifier = Modifier
-                               .padding(16.dp)
-                               .weight(1f)
-                       ) {
-                           Text(
-                               text = song.title,
-                               style = MaterialTheme.typography.titleMedium,
-                               fontWeight = FontWeight.Bold,
-                               maxLines = 1
-                           )
-                           Text(
-                               text = song.author,
-                               style = MaterialTheme.typography.titleSmall,
-                               color = MaterialTheme.colorScheme.onSurfaceVariant,
-                               maxLines = 1
-                           )
-                       }
-                       LikeButton(
-                           isLiked = song.isLiked,
-                           onClick = { }
-                       )
-                   }
-               }
-           }
-       }
-   }
+            itemsIndexed(playlist.songs) { index, song ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        CoverImage(
+                            coverBase64 = song.coverBase64,
+                            songId = song.id,
+                            size = 50.dp,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(1f)
+                        ) {
+                            Text(
+                                text = song.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = song.author,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                        LikeButton(
+                            isLiked = song.isLiked,
+                            onClick = { }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

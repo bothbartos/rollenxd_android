@@ -7,6 +7,7 @@ import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.PlaylistRepository
+import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,7 @@ class PlaylistDetailViewModel @Inject constructor(
                             id = 0L,
                             title = "Liked Songs",
                             author = "You",
-                            coverBase64 = "",
+                            coverBase64 = Constants.LIKED_SONG_BASE64,
                             songs = likedSongs
                         )
                         _playlistState.value = PlaylistState.Success

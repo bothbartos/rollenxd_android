@@ -13,7 +13,8 @@ import retrofit2.HttpException
 
 class PlaylistRepository @Inject constructor(
     private val playlistAPI: PlaylistAPI,
-    private val songApi: SongAPI) {
+    private val songApi: SongAPI
+) {
     suspend fun getPlaylists(): List<PlaylistData> = withContext(Dispatchers.IO) {
         val response = playlistAPI.getPlaylists()
 
@@ -32,9 +33,9 @@ class PlaylistRepository @Inject constructor(
     suspend fun getPlaylistById(id: Long): Playlist = withContext(Dispatchers.IO) {
         val response = playlistAPI.getPlaylistById(id)
 
-        if(response.isSuccessful) {
+        if (response.isSuccessful) {
             response.body() ?: throw IllegalStateException("Response body is null")
-        }else {
+        } else {
             Log.e(
                 "AudioRepository",
                 "Error getting playlist by id: ${response.code()} - ${response.message()}"
@@ -48,7 +49,10 @@ class PlaylistRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("AudioRepository", "Error getting liked songs: ${response.code()} - ${response.message()}")
+            Log.e(
+                "AudioRepository",
+                "Error getting liked songs: ${response.code()} - ${response.message()}"
+            )
             throw HttpException(response)
         }
         response.body()!!

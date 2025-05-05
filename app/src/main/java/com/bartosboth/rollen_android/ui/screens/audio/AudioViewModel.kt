@@ -110,48 +110,48 @@ class AudioViewModel @Inject constructor(
         }
     }
 
-    fun playPlaylist(id: Long){
+    fun playPlaylist(id: Long) {
         Log.d("PLAYLIST_ID", "playPlaylist: $id")
         viewModelScope.launch {
-            try{
+            try {
                 var playlist =
                     when (id) {
-                    0L -> {
-                        Playlist(
-                            id = 0L,
-                            title = "Liked Songs",
-                            author = "You",
-                            coverBase64 = "",
-                            songs = likedSongs
-                        )
-                    }
+                        0L -> {
+                            Playlist(
+                                id = 0L,
+                                title = "Liked Songs",
+                                author = "You",
+                                coverBase64 = Constants.LIKED_SONG_BASE64,
+                                songs = likedSongs
+                            )
+                        }
 
-                    else -> {
-                        playlistRepo.getPlaylistById(id)
+                        else -> {
+                            playlistRepo.getPlaylistById(id)
 
+                        }
                     }
-                }
                 _selectedPlaylist.value = playlist
                 songServiceHandler.setMediaItemList(emptyList())
                 val mediaItem = playlist.songs.map { createMediaItem(it) }
 
                 songServiceHandler.setMediaItemList(mediaItems = mediaItem)
                 songServiceHandler.play()
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
                 e.printStackTrace()
             }
         }
     }
 
-    fun playPlaylistSong(songId: Long, playlistId: Long){
+    fun playPlaylistSong(songId: Long, playlistId: Long) {
         viewModelScope.launch {
             try {
-                if(playlistId != selectedPlaylist.id){
+                if (playlistId != selectedPlaylist.id) {
                     val playlist = playlistRepo.getPlaylistById(playlistId)
                     val song = playlist.songs.find { it.id == songId }
 
-                    song?.let{
+                    song?.let {
                         _currentSelectedAudio.value = it
                     }
                     _selectedPlaylist.value = playlist
@@ -160,23 +160,23 @@ class AudioViewModel @Inject constructor(
 
                     songServiceHandler.setMediaItemList(mediaItems = mediaItem)
                     songServiceHandler.play()
-                }else{
+                } else {
                     val song = selectedPlaylist.songs.find { it.id == songId }
-                    song?.let{
+                    song?.let {
                         _currentSelectedAudio.value = it
                     }
                     songServiceHandler.playStreamingAudio(songId)
                 }
 
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
                 e.printStackTrace()
             }
         }
     }
 
-    private fun createMediaItem(song: Song): MediaItem{
-       return  MediaItem.Builder()
+    private fun createMediaItem(song: Song): MediaItem {
+        return MediaItem.Builder()
             .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
             .setMediaMetadata(
                 MediaMetadata.Builder().setTitle(song.title)
@@ -213,10 +213,12 @@ class AudioViewModel @Inject constructor(
                     Log.d("NEXT", "NEXT BUTTON PRESSED")
                     songServiceHandler.onPlayerEvents(PlayerEvent.Next)
                 }
+
                 UiEvents.Previous -> {
                     Log.d("PREVIOUS", "PREVIOUS BUTTON PRESSED")
                     songServiceHandler.onPlayerEvents(PlayerEvent.Previous)
                 }
+
                 is UiEvents.PlayPause -> {
                     songServiceHandler.onPlayerEvents(PlayerEvent.PlayPause)
                     isPlaying = !isPlaying
