@@ -86,11 +86,6 @@ dependencies {
     //Coil
     implementation(libs.coil.compose)
 
-    //RoomDB
-    implementation(libs.room)
-    implementation(libs.room.runtime)
-    ksp(libs.room.compiler)
-
     //Serialization
     implementation(libs.kotlinx.serialization.json)
 
@@ -107,7 +102,6 @@ dependencies {
     implementation (libs.accompanist.permissions)
 
     //Glide
-    implementation(libs.glide)
 
     //Navigation
     implementation (libs.androidx.navigation.compose)

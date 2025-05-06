@@ -4,12 +4,11 @@ import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import com.bartosboth.rollen_android.data.player.notification.NotificationManager
 import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
 import dagger.Module
 import dagger.Provides
@@ -50,6 +49,9 @@ object AppModule {
                     .build()
             )
             .build()
+            .also { player ->
+                Log.d("DI", "ExoPlayer instance created: $player")
+            }
     }
 
     @Provides
@@ -59,13 +61,6 @@ object AppModule {
         exoPlayer: ExoPlayer
     ): MediaSession = MediaSession.Builder(context, exoPlayer)
         .build()
-
-    @Provides
-    @Singleton
-    fun provideNotificationManager(
-        @ApplicationContext context: Context,
-        exoPlayer: ExoPlayer
-    ): NotificationManager = NotificationManager(context, exoPlayer)
 
     @Provides
     @Singleton

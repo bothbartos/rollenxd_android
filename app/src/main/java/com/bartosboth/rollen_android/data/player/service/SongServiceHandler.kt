@@ -1,6 +1,7 @@
 package com.bartosboth.rollen_android.data.player.service
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
@@ -39,6 +40,7 @@ class SongServiceHandler @Inject constructor(
 
     init {
         exoPlayer.addListener(this)
+        startMediaService()
     }
 
     fun setMediaItemList(mediaItems: List<MediaItem>) {
@@ -49,6 +51,12 @@ class SongServiceHandler @Inject constructor(
     fun play(){
         exoPlayer.play()
 
+    }
+
+    private fun startMediaService() {
+        val intent = Intent(context, SongService::class.java)
+        context.startForegroundService(intent)
+        Log.d("AudioViewModel", "Starting media service")
     }
 
     fun addMediaItem(songId: Long, mediaItem: MediaItem) {

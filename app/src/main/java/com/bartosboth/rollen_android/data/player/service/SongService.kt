@@ -1,42 +1,78 @@
 package com.bartosboth.rollen_android.data.player.service
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
+import android.util.Log
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.bartosboth.rollen_android.data.player.notification.NotificationManager
+import com.bartosboth.rollen_android.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SongService: MediaSessionService() {
-
-    @Inject
-    lateinit var mediaSession: MediaSession
-    private lateinit var player: ExoPlayer
-
-    @Inject
-    lateinit var notificationManager: NotificationManager
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        notificationManager.startNotificationService(mediaSessionService = this, mediaSession = mediaSession)
-        return super.onStartCommand(intent, flags, startId)
-    }
+class SongService : MediaSessionService() {
+    @Inject lateinit var mediaSession: MediaSession
+    @Inject lateinit var exoPlayer: ExoPlayer
 
     override fun onCreate() {
+        Log.d("SongService", "onCreate called")
         super.onCreate()
-        player = ExoPlayer.Builder(this).build()
-    }
+        createNotificationChannel()
+        addSession(mediaSession)
 
-
-    override fun onDestroy() {
-        player.release()
-        super.onDestroy()
+        Log.d("SongService", "Service created and session added")
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("SongService", "onStartCommand called")
+        return super.onStartCommand(intent, flags, startId)
+    }
 
+    private fun getSessionActivity(): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java)
+        return PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("CNC", "Creating notification channel")
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "Music Playback",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Music playback controls"
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setSound(null, null)
+            }
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+            Log.d("CNC", "Notification channel created")
+        }
+    }
+
+    override fun onDestroy() {
+        Log.d("SongService", "onDestroy called")
+        mediaSession.release()
+        exoPlayer.release()
+        super.onDestroy()
+    }
+
+    companion object {
+        const val NOTIFICATION_CHANNEL_ID = "music_channel"
+    }
 }

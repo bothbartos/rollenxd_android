@@ -2,7 +2,6 @@
 accompanistPermissions = "0.32.0"
 accompanistSystemuicontroller = "0.33.2-alpha"
 agp = "8.9.2"
-glide = "4.15.1"
 kotlin = "2.1.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -18,7 +17,6 @@ coroutinesVersion = "1.10.1"
 navigationComposeVersion = "2.8.9"
 retrofitVersion = "2.11.0"
 coilVersion = "2.7.0"
-roomVersion = "2.7.0"
 securityCrypto = "1.1.0-alpha07"
 serialization = "1.8.0"
 media3DatasourceOkhttp = "1.6.1"
@@ -35,7 +33,6 @@ androidx-media3-session = { module = "androidx.media3:media3-session", version.r
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Exoplayer" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -58,9 +55,6 @@ kotlinx-coroutines = {group = "org.jetbrains.kotlinx", name = "kotlinx-coroutine
 retrofit = {group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofitVersion"}
 retrofit-converter = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofitVersion"}
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
-room = {group = "androidx.room", name = "room-ktx", version.ref = "roomVersion"}
-room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "roomVersion"}
-room-compiler = {group = "androidx.room", name = "room-compiler", version.ref = "roomVersion"}
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
 

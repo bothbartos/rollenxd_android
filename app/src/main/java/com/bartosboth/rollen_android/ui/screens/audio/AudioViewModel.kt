@@ -3,6 +3,7 @@
 package com.bartosboth.rollen_android.ui.screens.audio
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
@@ -19,18 +20,20 @@ import androidx.media3.common.MediaMetadata
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
-import com.bartosboth.rollen_android.data.repository.AudioRepository
 import com.bartosboth.rollen_android.data.player.service.AudioState
 import com.bartosboth.rollen_android.data.player.service.PlayerEvent
 import com.bartosboth.rollen_android.data.player.service.SongServiceHandler
+import com.bartosboth.rollen_android.data.repository.AudioRepository
 import com.bartosboth.rollen_android.data.repository.PlaylistRepository
 import com.bartosboth.rollen_android.utils.Constants
+import com.bartosboth.rollen_android.utils.convertBase64ToBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -169,7 +172,6 @@ class AudioViewModel @Inject constructor(
                 if (songIndex != -1) {
                     _currentSelectedAudio.value = playlist.songs[songIndex]
                     songServiceHandler.playStreamingAudio(songId)
-                    songServiceHandler.play()
                 }
 
 
@@ -182,11 +184,19 @@ class AudioViewModel @Inject constructor(
     }
 
     private fun createMediaItem(song: Song): MediaItem {
+
+        val bitmap = convertBase64ToBitmap(song.coverBase64)
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val artworkData = outputStream.toByteArray()
+
         return MediaItem.Builder()
             .setUri("http://${Constants.BASE_URL}/api/song/stream/${song.id}".toUri())
             .setMediaMetadata(
                 MediaMetadata.Builder().setTitle(song.title)
-                    .setArtist(song.author).setExtras(Bundle().apply {
+                    .setArtist(song.author)
+                    .setArtworkData(artworkData, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+                    .setExtras(Bundle().apply {
                         putLong("songId", song.id)
                     }).build()
             ).build()
