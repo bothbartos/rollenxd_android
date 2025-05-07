@@ -45,6 +45,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
     hilt {
         enableAggregatingTask = false
     }
