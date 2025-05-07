@@ -5,6 +5,7 @@ import com.bartosboth.rollen_android.data.model.auth.LoginRequest
 import com.bartosboth.rollen_android.data.model.auth.LoginResponse
 import com.bartosboth.rollen_android.data.model.auth.RegisterRequest
 import com.bartosboth.rollen_android.data.network.AuthAPI
+import retrofit2.Response
 import javax.inject.Inject
 
 
@@ -28,12 +29,13 @@ class AuthRepository @Inject constructor(
     }
 
 
-    suspend fun register(username: String, email: String, password: String) {
+    suspend fun register(username: String, email: String, password: String): Response<Void> {
         val registerRequest = RegisterRequest(username, email, password)
         val response = authService.register(registerRequest)
-        if (!response.isSuccessful) {
-            throw Exception("Registration failed: ${response.message()}")
+        if(!response.isSuccessful){
+            throw Exception(response.message())
         }
+        return response
     }
 
     fun logout() {

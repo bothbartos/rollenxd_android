@@ -16,7 +16,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LoginViewModelKotestTest : StringSpec({
+    class LoginViewModelKotestTest : StringSpec({
     lateinit var viewModel: LoginViewModel
     lateinit var authRepository: AuthRepository
     val testDispatchers = StandardTestDispatcher()
@@ -31,7 +31,7 @@ class LoginViewModelKotestTest : StringSpec({
         Dispatchers.resetMain()
     }
 
-    "should emit Loading then Success on successful login" {
+    "should emit Success on successful login" {
         coEvery { authRepository.login("user", "pass") } returns mockk()
 
         viewModel.login("user", "pass")
@@ -44,7 +44,7 @@ class LoginViewModelKotestTest : StringSpec({
         }
     }
 
-    "should emit Loading then Error on failed login" {
+    "should emit Error on failed login" {
         val errorMessage = "Invalid credentials"
         coEvery { authRepository.login("user", "wrongpass") } throws Exception(errorMessage)
 

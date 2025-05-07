@@ -120,7 +120,7 @@ fun RegisterScreen(
             onImeAction = {
                 if (username.isNotEmpty() && email.isNotEmpty() &&
                     password.isNotEmpty() && password == confirmPassword) {
-                    viewModel.register(username, password, email)
+                    viewModel.register(username, email, password)
                 }
             },
             modifier = Modifier.focusRequester(confirmPasswordFocusRequester)
@@ -134,7 +134,7 @@ fun RegisterScreen(
 
         CustomButton(
             text = "Register",
-            onClick = { viewModel.register(username, password, email) },
+            onClick = { viewModel.register(username, email, password) },
             isEnabled = username.isNotEmpty() && password.isNotEmpty() && email.isNotEmpty() && password == confirmPassword,
             isLoading = registerState is RegisterState.Loading,
             modifier = Modifier.fillMaxWidth()

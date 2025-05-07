@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.bartosboth.rollen_android.data.model.auth.RegisterRequest
 import com.bartosboth.rollen_android.data.network.AuthAPI
 import androidx.lifecycle.viewModelScope
+import com.bartosboth.rollen_android.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,22 +14,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val authService: AuthAPI
+    private val authRepository: AuthRepository
 ): ViewModel() {
     private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
     val registerState: StateFlow<RegisterState> = _registerState
 
-    fun register(username: String, password: String, email: String) {
+    fun register(username: String, email: String, password: String) {
         viewModelScope.launch {
             try {
                 _registerState.value = RegisterState.Loading
+                val response = authRepository.register(username, email, password)
 
-                val registerRequest = RegisterRequest(username, email, password)
-                Log.d("REGISTER", "register: ${registerRequest.email}, ${registerRequest.name}, ${registerRequest.password}")
-                val response = authService.register(registerRequest)
-                Log.d("REGISTER", "register: ${response.code()}")
-
-                if (response.isSuccessful && response.code() == 201) {
+                if (response.isSuccessful) {
                     _registerState.value = RegisterState.Success
                 } else {
                     val errorMessage = when (response.code()) {
