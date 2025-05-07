@@ -1,11 +1,8 @@
 package com.bartosboth.rollen_android.ui.screens.playlistDetail
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
-import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
-import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.repository.PlaylistRepository
 import com.bartosboth.rollen_android.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
