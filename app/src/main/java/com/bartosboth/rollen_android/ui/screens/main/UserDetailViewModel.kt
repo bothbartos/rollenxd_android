@@ -68,18 +68,16 @@ class UserDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _updateState.value = UpdateState.Loading
             try {
-                // Log the request details for debugging
                 Log.d("UserDetailViewModel", "Updating user details - Bio: $bio, Image URI: $profilePictureUri")
 
                 val updatedUser = userDetailRepository.updateUserDetail(bio, profilePictureUri)
 
-                // Update local state with the response
                 _userDetails.value = _userDetails.value.copy(
                     bio = updatedUser.bio,
-                    profileImageBase64 = updatedUser.profilePictureBase64q ?: _userDetails.value.profileImageBase64
+                    profileImageBase64 = updatedUser.profilePictureBase64
                 )
                 _bio.value = updatedUser.bio
-                _profilePictureBase64.value = updatedUser.profilePictureBase64q ?: _profilePictureBase64.value
+                _profilePictureBase64.value = updatedUser.profilePictureBase64
                 _updateState.value = UpdateState.Success
                 Log.d("UserDetailViewModel", "Update successful")
             } catch (e: Exception) {

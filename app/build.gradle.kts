@@ -112,6 +112,10 @@ dependencies {
     //Security
     implementation(libs.androidx.security.crypto)
 
+    //Kotest
+    testImplementation(libs.bundles.kotest)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

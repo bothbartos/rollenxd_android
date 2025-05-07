@@ -42,7 +42,7 @@ class UserDetailRepository @Inject constructor(
         }
 
         val response = userDetailAPI.updateUserDetails(bioPart, profilePicturePart)
-        Log.d("UserDetailRepoRes", "updateUserDetail: ${response.body()?.profilePictureBase64q}")
+        Log.d("UserDetailRepoRes", "updateUserDetail: ${response.body()?.profilePictureBase64}")
         Log.d("UserDetailRepoRes", "updateUserDetail: ${response.body()?.bio}")
 
         if (response.isSuccessful) {
