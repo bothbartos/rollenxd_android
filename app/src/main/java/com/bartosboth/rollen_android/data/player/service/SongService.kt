@@ -37,16 +37,6 @@ class SongService : MediaSessionService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun getSessionActivity(): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java)
-        return PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-    }
-
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.d("CNC", "Creating notification channel")

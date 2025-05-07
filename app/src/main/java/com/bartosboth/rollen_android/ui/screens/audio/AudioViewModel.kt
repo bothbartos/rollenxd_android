@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
 import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
@@ -60,6 +61,7 @@ class AudioViewModel @Inject constructor(
     private val songServiceHandler: SongServiceHandler,
     private val audioRepo: AudioRepository,
     private val playlistRepo: PlaylistRepository,
+    private val tokenManager: TokenManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -87,8 +89,16 @@ class AudioViewModel @Inject constructor(
     val likedSongs: List<Song> get() = _likedSongs.value
 
     init {
-        loadAudioData()
-        observePlayerEvents()
+        viewModelScope.launch {
+            tokenManager.isLoggedIn.collect {
+                if (it) {
+                    loadAudioData()
+                    observePlayerEvents()
+                } else {
+                    resetState()
+                }
+            }
+        }
     }
 
     private fun loadAudioData() {

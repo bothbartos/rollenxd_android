@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.repository.UserDetailRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ private val userDetailDummy = UserDetail(
 
 @HiltViewModel
 class UserDetailViewModel @Inject constructor(
-    private val userDetailRepository: UserDetailRepository
+    private val userDetailRepository: UserDetailRepository,
+    private val tokenManager: TokenManager
 ): ViewModel(){
     private val _userDetails = MutableStateFlow(userDetailDummy)
     val userDetails: StateFlow<UserDetail> = _userDetails.asStateFlow()
@@ -40,7 +42,12 @@ class UserDetailViewModel @Inject constructor(
 
 
     init{
-        loadUserDetails()
+        viewModelScope.launch {
+            tokenManager.isLoggedIn.collect {
+                if(it) loadUserDetails()
+                else resetState()
+            }
+        }
     }
 
 

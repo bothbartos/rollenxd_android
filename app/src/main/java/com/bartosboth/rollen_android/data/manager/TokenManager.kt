@@ -8,6 +8,9 @@ import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class TokenManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -20,6 +23,9 @@ class TokenManager @Inject constructor(
     private val sharedPreferences: SharedPreferences by lazy {
         createEncryptedSharedPreferences()
     }
+    private val _isLoggedIn = MutableStateFlow<Boolean>(isLoggedIn())
+
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     private fun createEncryptedSharedPreferences(): SharedPreferences {
         val masterKey = MasterKey.Builder(context)
@@ -37,6 +43,7 @@ class TokenManager @Inject constructor(
 
     fun saveAccessToken(token: String) {
         sharedPreferences.edit() { putString(KEY_ACCESS_TOKEN, token) }
+        _isLoggedIn.value = true
     }
 
     fun getAccessToken(): String? {
@@ -45,6 +52,7 @@ class TokenManager @Inject constructor(
 
     private fun clearAccessToken() {
         sharedPreferences.edit() { remove(KEY_ACCESS_TOKEN) }
+        _isLoggedIn.value = false
     }
     fun isLoggedIn(): Boolean {
         return !getAccessToken().isNullOrEmpty()

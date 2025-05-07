@@ -703,7 +703,9 @@ fun BottomBarPreview(){
 @Composable
 fun WelcomeLogo(){
     Column (
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

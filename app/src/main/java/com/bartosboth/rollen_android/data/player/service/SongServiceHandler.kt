@@ -40,7 +40,6 @@ class SongServiceHandler @Inject constructor(
 
     init {
         exoPlayer.addListener(this)
-        startMediaService()
     }
 
     fun setMediaItemList(mediaItems: List<MediaItem>) {
@@ -49,6 +48,7 @@ class SongServiceHandler @Inject constructor(
     }
 
     fun play(){
+        startMediaService()
         exoPlayer.play()
 
     }
@@ -69,7 +69,7 @@ class SongServiceHandler @Inject constructor(
         if (exoPlayer.mediaItemCount == 0) {
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
-            exoPlayer.play()
+            play()
         } else {
             val currentSongId = exoPlayer.currentMediaItem?.mediaMetadata?.extras?.getLong("songId")
             if (currentSongId == songId) {
@@ -87,7 +87,7 @@ class SongServiceHandler @Inject constructor(
                 if (index != -1) {
                     exoPlayer.seekTo(index, 0)
                     exoPlayer.prepare()
-                    exoPlayer.play()
+                    play()
                 }
             }
         }
@@ -112,7 +112,7 @@ class SongServiceHandler @Inject constructor(
                 if (index != -1) {
                     exoPlayer.seekTo(index, 0)
                     exoPlayer.prepare()
-                    exoPlayer.play()
+                    play()
                     return
                 }
             }
@@ -125,7 +125,7 @@ class SongServiceHandler @Inject constructor(
                 .createMediaSource(MediaItem.fromUri(audioUri))
             exoPlayer.setMediaSource(mediaSource)
             exoPlayer.prepare()
-            exoPlayer.play()
+            play()
         } catch (e: Exception) {
             Log.e("SongServiceHandler", "Error streaming audio: ${e.message}", e)
         }

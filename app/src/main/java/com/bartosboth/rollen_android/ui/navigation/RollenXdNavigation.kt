@@ -12,19 +12,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bartosboth.rollen_android.data.manager.DataRefreshCoordinator
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.ui.screens.audio.AudioViewModel
 import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
 import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
-import com.bartosboth.rollen_android.ui.screens.profile.AuthState
-import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
 import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailScreen
 import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailViewModel
+import com.bartosboth.rollen_android.ui.screens.profile.AuthState
+import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
@@ -40,9 +39,6 @@ fun RollenXdNavigation() {
     val startDestination = remember {
         if (TokenManager(context).isLoggedIn()) MainScreen else LoginScreen
     }
-    val dataRefreshCoordinator = remember {
-        DataRefreshCoordinator(userDetailViewModel, audioViewModel)
-    }
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable<LoginScreen> {
@@ -51,7 +47,6 @@ fun RollenXdNavigation() {
                 loginViewModel,
                 onNavigateToRegister = { navController.navigate(RegisterScreen) },
                 onLoginSuccess = {
-                    dataRefreshCoordinator.refresh()
                     navController.navigate(MainScreen) {
                         popUpTo(LoginScreen) { inclusive = true }
                     }
