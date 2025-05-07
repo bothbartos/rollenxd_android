@@ -1,6 +1,7 @@
 package com.bartosboth.rollen_android.ui.components
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -697,4 +698,24 @@ fun BottomBarPreview(){
             songs = emptyList()
         )
     )
+}
+
+@Composable
+fun WelcomeLogo(){
+    Column (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = Modifier.size(100.dp),
+            painter = painterResource(R.drawable.rollenxdicon),
+            contentDescription = "RollenXD Logo"
+        )
+        Text(
+            text = "Welcome to RollenXD",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+    }
 }

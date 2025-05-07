@@ -35,6 +35,7 @@ import com.bartosboth.rollen_android.ui.components.CustomButton
 import com.bartosboth.rollen_android.ui.components.CustomTextField
 import com.bartosboth.rollen_android.ui.components.ErrorMessage
 import com.bartosboth.rollen_android.ui.components.ScreenContainer
+import com.bartosboth.rollen_android.ui.components.WelcomeLogo
 
 @Composable
 fun RegisterScreen(
@@ -62,11 +63,14 @@ fun RegisterScreen(
                 errorMessage = (registerState as RegisterState.Error).message
                 showError = true
             }
-            else -> { /* Do nothing */ }
+            else -> {  }
         }
     }
 
     ScreenContainer {
+
+        WelcomeLogo()
+
         Text(
             text = "Create Account",
             style = MaterialTheme.typography.headlineMedium,
