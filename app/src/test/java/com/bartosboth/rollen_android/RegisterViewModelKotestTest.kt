@@ -35,7 +35,6 @@ class RegisterViewModelKotestTest : StringSpec({
     }
 
     "should emit Success on successful registration" {
-        // Mock successful response
         val mockResponse: Response<Void> = Response.success(null)
         coEvery { authRepository.register(any(), any(), any()) } returns mockResponse
 
@@ -49,7 +48,6 @@ class RegisterViewModelKotestTest : StringSpec({
     }
 
     "should emit Error with appropriate message on taken username registration" {
-        // Mock 409 Conflict response
         val errorResponse = Response.error<Void>(
             409,
             "Conflict".toResponseBody("text/plain".toMediaType())
@@ -67,7 +65,6 @@ class RegisterViewModelKotestTest : StringSpec({
     }
 
     "should emit Error with appropriate message on invalid input data" {
-        // Mock 400 Bad Request response
         val errorResponse = Response.error<Void>(
             400,
             "Bad Request".toResponseBody("text/plain".toMediaType())
@@ -85,7 +82,6 @@ class RegisterViewModelKotestTest : StringSpec({
     }
 
     "should emit Network error message on exception" {
-        // Mock network exception
         coEvery { authRepository.register(any(), any(), any()) } throws IOException("Network error")
 
         viewModel.register("user", "email@email.com", "password")
