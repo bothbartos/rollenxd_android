@@ -26,6 +26,7 @@ import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.ui.components.AppTopBar
+import com.bartosboth.rollen_android.ui.components.ErrorMessage
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.PlaylistListItem
 import com.bartosboth.rollen_android.ui.components.SongListItem
@@ -96,6 +97,15 @@ fun MainScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
+                    }
+                }
+
+                is UiState.Error -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        ErrorMessage(message = uiState.message)
                     }
                 }
 

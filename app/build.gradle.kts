@@ -45,6 +45,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
     hilt {
         enableAggregatingTask = false
     }
@@ -111,6 +116,10 @@ dependencies {
 
     //Security
     implementation(libs.androidx.security.crypto)
+
+    //Kotest
+    testImplementation(libs.bundles.kotest)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

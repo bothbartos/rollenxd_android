@@ -27,7 +27,6 @@ class UserDetailRepository @Inject constructor(
         if (response.isSuccessful) {
             return response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("UserDetailRepo", "Error getting user details: ${response.code()} - ${response.message()}")
             throw HttpException(response)
         }
     }
@@ -42,14 +41,10 @@ class UserDetailRepository @Inject constructor(
         }
 
         val response = userDetailAPI.updateUserDetails(bioPart, profilePicturePart)
-        Log.d("UserDetailRepoRes", "updateUserDetail: ${response.body()?.profilePictureBase64q}")
-        Log.d("UserDetailRepoRes", "updateUserDetail: ${response.body()?.bio}")
 
         if (response.isSuccessful) {
             return response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("UserDetailRepo", "Error updating user details: ${response.code()} - ${response.message()}")
-            Log.e("UserDetailRepo", "Error body: ${response.errorBody()?.string()}")
             throw HttpException(response)
         }
     }

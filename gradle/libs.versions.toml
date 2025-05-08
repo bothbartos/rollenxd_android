@@ -20,6 +20,12 @@ coilVersion = "2.7.0"
 securityCrypto = "1.1.0-alpha07"
 serialization = "1.8.0"
 media3DatasourceOkhttp = "1.6.1"
+mockk = "1.14.2"
+kotlinxCoroutinesTest = "1.10.1"
+kotestAssertionsCore = "5.8.0"
+kotestRunnerJunit5 = "5.8.0"
+turbine = "1.1.0"
+
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -57,6 +63,16 @@ retrofit-converter = {group = "com.squareup.retrofit2", name = "converter-gson",
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
+
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotestAssertionsCore" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotestRunnerJunit5" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+[bundles]
+kotest = ["kotest-assertions-core", "kotest-runner-junit5", "kotlinx-coroutines-test", "mockk", "turbine"]
+
 
 
 [plugins]

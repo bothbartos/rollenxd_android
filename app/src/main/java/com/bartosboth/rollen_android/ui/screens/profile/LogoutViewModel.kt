@@ -22,10 +22,6 @@ class LogoutViewModel @Inject constructor(
             _authState.value = AuthState.LoggedOut
         }
     }
-
-    fun isLoggedIn(): Boolean{
-        return authRepository.isLoggedIn()
-    }
 }
 
 sealed class AuthState{
