@@ -1,4 +1,3 @@
-@file:OptIn(SavedStateHandleSaveableApi::class)
 
 package com.bartosboth.rollen_android.ui.screens.audio
 
@@ -56,6 +55,7 @@ private val playlistDummy = Playlist(
     songs = emptyList(),
 )
 
+@OptIn(SavedStateHandleSaveableApi::class)
 @HiltViewModel
 class AudioViewModel @Inject constructor(
     private val songServiceHandler: SongServiceHandler,
@@ -118,13 +118,12 @@ class AudioViewModel @Inject constructor(
                 _playlists.value = listOf(likedSongPlaylist) + playlist
                 _uiState.value = UiState.Ready
             } catch (e: Exception) {
-                e.printStackTrace()
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
     fun playPlaylist(id: Long) {
-        Log.d("PLAYLIST_ID", "playPlaylist: $id")
         viewModelScope.launch {
             try {
                 var playlist =
@@ -145,8 +144,7 @@ class AudioViewModel @Inject constructor(
                 songServiceHandler.setMediaItemList(mediaItems = mediaItem)
                 songServiceHandler.play()
             } catch (e: Exception) {
-                Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
-                e.printStackTrace()
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -187,8 +185,7 @@ class AudioViewModel @Inject constructor(
 
 
             } catch (e: Exception) {
-                Log.d("PLAYLIST ERROR", "playPlaylist: ${e.message}")
-                e.printStackTrace()
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -217,7 +214,6 @@ class AudioViewModel @Inject constructor(
             try {
                 _selectedPlaylist.value = playlistDummy
                 val selectedSong = audioList.find { it.id == songId }
-                Log.d("SELECTEDSONG", "playSong: selected song ${selectedSong?.id} ")
                 if (selectedSong != null) {
                     _currentSelectedAudio.value = selectedSong
 
@@ -227,8 +223,7 @@ class AudioViewModel @Inject constructor(
                     songServiceHandler.playStreamingAudio(songId)
                 }
             } catch (e: Exception) {
-                Log.d("PLAYSONGERROR", "playSong: ${e.message}")
-                e.printStackTrace()
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -237,28 +232,20 @@ class AudioViewModel @Inject constructor(
         viewModelScope.launch {
             when (uiEvents) {
                 UiEvents.Next -> {
-                    Log.d("NEXT", "NEXT BUTTON PRESSED")
                     songServiceHandler.onPlayerEvents(PlayerEvent.Next)
                 }
 
                 UiEvents.Previous -> {
-                    Log.d("PREVIOUS", "PREVIOUS BUTTON PRESSED")
                     songServiceHandler.onPlayerEvents(PlayerEvent.Previous)
                 }
 
                 is UiEvents.PlayPause -> {
                     songServiceHandler.onPlayerEvents(PlayerEvent.PlayPause)
                     isPlaying = !isPlaying
-                    Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                 }
 
                 is UiEvents.SeekTo -> {
                     val seekPositionMs = (duration * uiEvents.position).toLong()
-                    Log.d(
-                        "SEEKING",
-                        "Seeking to position: $seekPositionMs ms (current progress: $progress)"
-                    )
-
                     progress = uiEvents.position * 100f
 
                     songServiceHandler.onPlayerEvents(
@@ -283,14 +270,12 @@ class AudioViewModel @Inject constructor(
                         audioState.songId?.let { id ->
                             audioList.find { it.id == id }?.let { song ->
                                 _currentSelectedAudio.value = song
-                                Log.d("CURRENT_SONG", "Updated to: ${song.title} by ${song.author}")
                             }
                         }
                     }
 
                     is AudioState.Playing -> {
                         isPlaying = audioState.isPlaying
-                        Log.d("AudioViewModel", "isPlaying updated: $isPlaying")
                     }
 
                     is AudioState.Progress -> calculateProgressValue(audioState.progress)
@@ -322,7 +307,7 @@ class AudioViewModel @Inject constructor(
                     if (song.id == id) song.copy(isLiked = true) else song
                 }
             } catch (e: Exception) {
-                Log.d("LIKE ERROR", "LIKE ERROR: ${e.message}")
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -339,7 +324,7 @@ class AudioViewModel @Inject constructor(
                     if (song.id == id) song.copy(isLiked = false) else song
                 }
             } catch (e: Exception) {
-                Log.d("UNLIKE ERROR", "UNLIKE ERROR: ${e.message}")
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -359,22 +344,13 @@ class AudioViewModel @Inject constructor(
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-    fun refreshAudioData() {
-        viewModelScope.launch {
-            try {
-                val songs = audioRepo.getAudioData()
-                _audioList.value = songs
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 }
 
 
 sealed class UiState {
     object Initial : UiState()
     object Ready : UiState()
+    data class Error(val message: String) : UiState()
 }
 
 sealed class UiEvents {
