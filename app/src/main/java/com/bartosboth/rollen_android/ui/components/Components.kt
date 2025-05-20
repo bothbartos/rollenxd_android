@@ -483,7 +483,8 @@ fun MiniPlayerBar(
     onSearchClick: () -> Unit,
     onProfileClick: () -> Unit,
     userDetail: UserDetail,
-    currentPlayingAudioId: Long = -1L
+    currentPlayingAudioId: Long = -1L,
+    isLiked: Boolean
 ) {
     BottomAppBar(
         modifier = Modifier.height(if(currentPlayingAudioId == -1L) 91.dp else 150.dp),
@@ -515,7 +516,7 @@ fun MiniPlayerBar(
                             modifier = Modifier.weight(1f)
                         )
 
-                        LikeButton(isLiked = audio.isLiked, onClick = { onLike(audio.id)})
+                        LikeButton(isLiked = isLiked, onClick = { onLike(audio.id)})
 
                         PlayPauseButton(
                             isPlaying = isAudioPlaying,
@@ -696,7 +697,8 @@ fun BottomBarPreview(){
             profileImageBase64 = "",
             email = "email",
             songs = emptyList()
-        )
+        ),
+        isLiked = false,
     )
 }
 
