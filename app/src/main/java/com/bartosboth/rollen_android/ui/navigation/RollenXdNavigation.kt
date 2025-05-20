@@ -70,10 +70,13 @@ fun RollenXdNavigation() {
         }
 
         navigation(startDestination = MainScreen, route = MainFlow::class) {
-            composable<MainScreen> {
-                val audioViewModel: AudioViewModel = hiltViewModel()
-                val userDetailViewModel: UserDetailViewModel = hiltViewModel()
-                val likeViewModel: LikeViewModel = hiltViewModel()
+            composable<MainScreen> {backstackEntry ->
+                val parentEntry = remember(backstackEntry) {
+                    navController.getBackStackEntry(MainFlow)
+                }
+                val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
+                val userDetailViewModel: UserDetailViewModel = hiltViewModel(parentEntry)
+                val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
                 val likedSongIds = likeViewModel.likedSongIds.collectAsState()
 
                 val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
