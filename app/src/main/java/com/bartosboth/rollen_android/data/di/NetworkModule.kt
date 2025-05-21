@@ -2,9 +2,10 @@ package com.bartosboth.rollen_android.data.di
 
 import android.content.Context
 import com.bartosboth.rollen_android.data.manager.TokenManager
-import com.bartosboth.rollen_android.data.network.AuthInterceptor
 import com.bartosboth.rollen_android.data.network.AuthAPI
+import com.bartosboth.rollen_android.data.network.AuthInterceptor
 import com.bartosboth.rollen_android.data.network.PlaylistAPI
+import com.bartosboth.rollen_android.data.network.SearchAPI
 import com.bartosboth.rollen_android.data.network.SongAPI
 import com.bartosboth.rollen_android.data.network.UserDetailAPI
 import com.bartosboth.rollen_android.utils.Constants
@@ -82,5 +83,16 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(PlaylistAPI::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchAPI(okHttpClient: OkHttpClient): SearchAPI {
+        return Retrofit.Builder()
+            .baseUrl("http://${Constants.BASE_URL}/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(SearchAPI::class.java)
     }
 }

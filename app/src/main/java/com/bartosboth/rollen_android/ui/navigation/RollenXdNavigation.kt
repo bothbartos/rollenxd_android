@@ -29,6 +29,8 @@ import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
+import com.bartosboth.rollen_android.ui.screens.search.SearchScreen
+import com.bartosboth.rollen_android.ui.screens.search.SearchViewModel
 
 
 @Composable
@@ -102,7 +104,7 @@ fun RollenXdNavigation() {
 
             composable<PlaylistDetailScreen> { backstackEntry ->
                 val playlistId =
-                    backstackEntry.arguments?.getLong(PlaylistDetailScreen.playlistIdArg) ?: -1L
+                    backstackEntry.arguments?.getLong(PlaylistDetailScreen.PLAYLIST_ID_ARG) ?: -1L
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
@@ -176,6 +178,41 @@ fun RollenXdNavigation() {
                     onPlayPause = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                     onNext = { audioViewModel.onUiEvent(UiEvents.Next) },
                 )
+            }
+
+            composable<SearchScreen> {backstackEntry ->
+                val parentEntry = remember(backstackEntry) {
+                    navController.getBackStackEntry(MainFlow)
+                }
+
+                val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
+                val userDetailViewModel: UserDetailViewModel = hiltViewModel(parentEntry)
+                val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
+                val searchViewModel: SearchViewModel = hiltViewModel(parentEntry)
+
+                val userDetails by userDetailViewModel.userDetails.collectAsState()
+                val likedSongIds = likeViewModel.likedSongIds.collectAsState()
+                val searchState = searchViewModel.searchState.collectAsState().value
+                val searchResult = searchViewModel.searchResult.collectAsState().value
+                val searchQuery = searchViewModel.searchQuery.collectAsState().value
+
+                SearchScreen(
+                    searchState = searchState,
+                    onTextChange = { searchViewModel.updateSearchQuery(it) },
+                    searchResult = searchResult,
+                    navController = navController,
+                    onBackClick = navController::popBackStack,
+                    progress = audioViewModel.progress,
+                    isAudioPlaying = audioViewModel.isPlaying,
+                    currentPlayingAudio = audioViewModel.currentSelectedAudio,
+                    onCurrentSongLike = { likeViewModel.toggleLike(audioViewModel.currentSelectedAudio.id) },
+                    userDetail = userDetails,
+                    onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                    isCurrentSongLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
+                    onSongClick = { audioViewModel.playSong(it) },
+                    searchQuery = searchQuery
+                )
+
             }
 
             composable<ProfileScreen> {backstackEntry ->

@@ -146,20 +146,20 @@ fun PlayerScreen(
                     MediaControlButton(
                         icon = R.drawable.skip_prev,
                         contentDescription = "Previous",
-                        onClick = { onPrevious }
+                        onClick = { onPrevious() }
                     )
 
                     // Play/Pause button
                     LargePlayPauseButton(
                         isPlaying = isPlaying,
-                        onClick = { onPlayPause }
+                        onClick = { onPlayPause() }
                     )
 
                     // Next button
                     MediaControlButton(
                         icon = R.drawable.skip_next,
                         contentDescription = "Next",
-                        onClick = { onNext }
+                        onClick = { onNext() }
                     )
                 }
 
