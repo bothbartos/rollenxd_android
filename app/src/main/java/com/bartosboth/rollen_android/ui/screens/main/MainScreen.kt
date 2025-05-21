@@ -50,7 +50,8 @@ fun MainScreen(
     onSongClick: (Int) -> Unit,
     onPlaylistClick: (Long) -> Unit,
     onLike: (Long) -> Unit,
-    uiState: UiState
+    uiState: UiState,
+    isLiked: Boolean
 ) {
 
     Scaffold(
@@ -72,6 +73,7 @@ fun MainScreen(
                 onBarClick = { navController.navigate(PlayerScreen) },
                 userDetail = userDetail,
                 currentPlayingAudioId = currentPlayingAudio.id,
+                isLiked = isLiked
                 )
         }
     ) { innerPadding ->

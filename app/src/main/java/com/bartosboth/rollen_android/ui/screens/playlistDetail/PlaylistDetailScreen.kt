@@ -51,6 +51,8 @@ fun PlaylistDetailScreen(
     userDetail: UserDetail,
     onStart: () -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
+    isCurrentSongLiked: Boolean,
+    likedSongIds: Set<Long>,
     navController: NavController
 ) {
     Scaffold(
@@ -73,6 +75,7 @@ fun PlaylistDetailScreen(
                 onBarClick = { navController.navigate(PlayerScreen) },
                 userDetail = userDetail,
                 currentPlayingAudioId = currentPlayingAudio.id,
+                isLiked = isCurrentSongLiked
             )
         }
     ) { innerPadding ->
@@ -186,7 +189,8 @@ fun PlaylistDetailScreen(
                                     song = song,
                                     playlistId = playlist.id,
                                     onSongLike = onSongLike,
-                                    onPlaylistSongPlay = onPlaylistSongPlay
+                                    onPlaylistSongPlay = onPlaylistSongPlay,
+                                    isLiked = likedSongIds.contains(song.id)
                                 )
                             }
                         }
@@ -204,6 +208,7 @@ fun PlaylistSongRow(
     playlistId: Long,
     onSongLike: (Song) -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
+    isLiked: Boolean
     ){
     Surface(
         shape = RoundedCornerShape(8.dp),
@@ -243,7 +248,7 @@ fun PlaylistSongRow(
                 )
             }
             LikeButton(
-                isLiked = song.isLiked,
+                isLiked = isLiked,
                 onClick = { onSongLike(song) }
             )
         }
@@ -368,7 +373,8 @@ fun PlaylistDetailScreenPreview(
                         song = song,
                         playlistId = playlist.id,
                         onSongLike = {},
-                        onPlaylistSongPlay = { _, _ -> }
+                        onPlaylistSongPlay = { _, _ -> },
+                        isLiked = false
                     )
                 }
             }

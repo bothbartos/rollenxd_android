@@ -33,11 +33,23 @@ import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
 
 @Composable
 fun PlayerScreen(
-    viewModel: AudioViewModel,
-    navController: NavController
+    navController: NavController,
+    coverBase64: String,
+    songId: Long,
+    title: String,
+    author: String,
+    isLiked: Boolean,
+    isPlaying: Boolean,
+    progress: Float,
+    progressString: String,
+    duration: Long,
+    totalDuration: Double,
+    onLike: (Long) -> Unit,
+    onSeek: (Float) -> Unit,
+    onPrevious: () -> Unit,
+    onPlayPause: () -> Unit,
+    onNext: () -> Unit,
 ) {
-    val isPlaying = viewModel.isPlaying
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
@@ -77,8 +89,8 @@ fun PlayerScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CoverImage(
-                    coverBase64 = viewModel.currentSelectedAudio.coverBase64,
-                    songId = viewModel.currentSelectedAudio.id,
+                    coverBase64 = coverBase64,
+                    songId = songId,
                     size = 300.dp,
                     shape = RoundedCornerShape(8.dp),
                     shadowElevation = 8.dp
@@ -98,22 +110,16 @@ fun PlayerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SongInfo(
-                        title = viewModel.currentSelectedAudio.title,
-                        artist = viewModel.currentSelectedAudio.author,
+                        title = title,
+                        artist = author,
                         titleStyle = MaterialTheme.typography.headlineSmall,
                         artistStyle = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
 
                     LikeButton(
-                        isLiked = viewModel.currentSelectedAudio.isLiked,
-                        onClick = {
-                            if (viewModel.currentSelectedAudio.isLiked) {
-                                viewModel.unlikeSong(viewModel.currentSelectedAudio.id)
-                            } else {
-                                viewModel.likeSong(viewModel.currentSelectedAudio.id)
-                            }
-                        }
+                        isLiked = isLiked,
+                        onClick = { onLike(songId) }
                     )
                 }
 
@@ -121,11 +127,11 @@ fun PlayerScreen(
 
                 // Progress bar
                 ProgressSlider(
-                    progress = viewModel.progress,
-                    duration = viewModel.duration,
-                    currentTime = viewModel.progressString,
-                    totalDuration = viewModel.currentSelectedAudio.length,
-                    onSeek = { viewModel.onUiEvent(UiEvents.SeekTo(it)) }
+                    progress = progress,
+                    duration = duration,
+                    currentTime = progressString,
+                    totalDuration = totalDuration,
+                    onSeek = { onSeek(it) }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -140,20 +146,20 @@ fun PlayerScreen(
                     MediaControlButton(
                         icon = R.drawable.skip_prev,
                         contentDescription = "Previous",
-                        onClick = { viewModel.onUiEvent(UiEvents.Previous) }
+                        onClick = { onPrevious }
                     )
 
                     // Play/Pause button
                     LargePlayPauseButton(
                         isPlaying = isPlaying,
-                        onClick = { viewModel.onUiEvent(UiEvents.PlayPause) }
+                        onClick = { onPlayPause }
                     )
 
                     // Next button
                     MediaControlButton(
                         icon = R.drawable.skip_next,
                         contentDescription = "Next",
-                        onClick = { viewModel.onUiEvent(UiEvents.Next) }
+                        onClick = { onNext }
                     )
                 }
 

@@ -295,40 +295,6 @@ class AudioViewModel @Inject constructor(
         progressString = formatDuration(currentProgress)
     }
 
-    fun likeSong(id: Long) {
-        viewModelScope.launch {
-            try {
-                audioRepo.likeSong(id)
-                if (_currentSelectedAudio.value.id == id) {
-                    _currentSelectedAudio.value =
-                        _currentSelectedAudio.value.copy(isLiked = true)
-                }
-                _audioList.value = _audioList.value.map { song ->
-                    if (song.id == id) song.copy(isLiked = true) else song
-                }
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-
-    fun unlikeSong(id: Long) {
-        viewModelScope.launch {
-            try {
-                audioRepo.unlikeSong(id)
-                if (_currentSelectedAudio.value.id == id) {
-                    _currentSelectedAudio.value =
-                        _currentSelectedAudio.value.copy(isLiked = false)
-                }
-                _audioList.value = _audioList.value.map { song ->
-                    if (song.id == id) song.copy(isLiked = false) else song
-                }
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-
     fun resetState() {
         _currentSelectedAudio.value =
             audioDummy.copy(title = "No song selected", author = "Unknown")
