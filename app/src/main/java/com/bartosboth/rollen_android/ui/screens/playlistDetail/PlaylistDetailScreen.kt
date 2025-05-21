@@ -36,6 +36,7 @@ import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.ui.navigation.ProfileScreen
+import com.bartosboth.rollen_android.ui.navigation.SearchScreen
 
 @Composable
 fun PlaylistDetailScreen(
@@ -70,7 +71,7 @@ fun PlaylistDetailScreen(
                 onPlayPauseClick = onStart,
                 onLike = onCurrentSongLike,
                 onHomeClick = { navController.navigate(MainScreen) },
-                onSearchClick = { },
+                onSearchClick = { navController.navigate(SearchScreen) },
                 onProfileClick = { navController.navigate(ProfileScreen) },
                 onBarClick = { navController.navigate(PlayerScreen) },
                 userDetail = userDetail,

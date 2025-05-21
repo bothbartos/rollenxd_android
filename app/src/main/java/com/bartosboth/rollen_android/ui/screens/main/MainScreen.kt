@@ -33,6 +33,7 @@ import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.ui.navigation.ProfileScreen
+import com.bartosboth.rollen_android.ui.navigation.SearchScreen
 import com.bartosboth.rollen_android.ui.screens.audio.UiState
 
 
@@ -68,7 +69,7 @@ fun MainScreen(
                 onPlayPauseClick = onStart,
                 onLike = onLike,
                 onHomeClick = { navController.navigate(MainScreen) },
-                onSearchClick = { },
+                onSearchClick = { navController.navigate(SearchScreen) },
                 onProfileClick = { navController.navigate(ProfileScreen) },
                 onBarClick = { navController.navigate(PlayerScreen) },
                 userDetail = userDetail,

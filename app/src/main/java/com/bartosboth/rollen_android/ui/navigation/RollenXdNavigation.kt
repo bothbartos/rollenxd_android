@@ -29,6 +29,8 @@ import com.bartosboth.rollen_android.ui.screens.profile.LogoutViewModel
 import com.bartosboth.rollen_android.ui.screens.profile.ProfileScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
+import com.bartosboth.rollen_android.ui.screens.search.SearchScreen
+import com.bartosboth.rollen_android.ui.screens.search.SearchViewModel
 
 
 @Composable
@@ -185,9 +187,29 @@ fun RollenXdNavigation() {
 
                 val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
                 val userDetailViewModel: UserDetailViewModel = hiltViewModel(parentEntry)
-                val userDetails by userDetailViewModel.userDetails.collectAsState()
+                val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
+                val searchViewModel: SearchViewModel = hiltViewModel(parentEntry)
 
-                SearchScreen()
+                val userDetails by userDetailViewModel.userDetails.collectAsState()
+                val likedSongIds = likeViewModel.likedSongIds.collectAsState()
+                val searchState = searchViewModel.searchState.collectAsState().value
+                val searchResult = searchViewModel.searchResult.collectAsState().value
+
+                SearchScreen(
+                    searchState = searchState,
+                    onTextChange = { searchViewModel.updateSearchQuery(it) },
+                    searchResult = searchResult,
+                    navController = navController,
+                    onBackClick = navController::popBackStack,
+                    progress = audioViewModel.progress,
+                    isAudioPlaying = audioViewModel.isPlaying,
+                    currentPlayingAudio = audioViewModel.currentSelectedAudio,
+                    onCurrentSongLike = { likeViewModel.toggleLike(audioViewModel.currentSelectedAudio.id) },
+                    userDetail = userDetails,
+                    onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
+                    isCurrentSongLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
+                    onSongClick = { audioViewModel.playSong(it) },
+                )
 
             }
 
