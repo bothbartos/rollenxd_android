@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -347,6 +348,7 @@ fun ProgressSlider(
 
 @Composable
 fun SongListItem(
+    modifier: Modifier = Modifier,
     song: Song,
     isPlaying: Boolean,
     onClick: () -> Unit
@@ -364,11 +366,12 @@ fun SongListItem(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(7.dp)
             .clickable { onClick() },
-        colors = cardColors
+        colors = cardColors,
+
     ) {
         Column(
             horizontalAlignment = Alignment.Start,
@@ -397,6 +400,65 @@ fun SongListItem(
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
+        }
+    }
+}
+@Composable
+fun SongListRowItem(
+    modifier: Modifier = Modifier,
+    song: Song,
+    isPlaying: Boolean,
+    onClick: () -> Unit
+) {
+    val cardColors = if (isPlaying) {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    } else {
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(7.dp)
+            .clickable { onClick() },
+        colors = cardColors,
+
+        ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            CoverImage(
+                coverBase64 = song.coverBase64,
+                songId = song.id,
+                size = 130.dp,
+                shadowElevation = 4.dp
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)){
+                Text(
+                    text = song.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+
+                Text(
+                    text = song.author,
+                    style = MaterialTheme.typography.bodyMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

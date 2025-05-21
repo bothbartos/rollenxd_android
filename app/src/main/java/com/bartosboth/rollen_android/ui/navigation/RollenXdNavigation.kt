@@ -194,6 +194,7 @@ fun RollenXdNavigation() {
                 val likedSongIds = likeViewModel.likedSongIds.collectAsState()
                 val searchState = searchViewModel.searchState.collectAsState().value
                 val searchResult = searchViewModel.searchResult.collectAsState().value
+                val searchQuery = searchViewModel.searchQuery.collectAsState().value
 
                 SearchScreen(
                     searchState = searchState,
@@ -209,6 +210,7 @@ fun RollenXdNavigation() {
                     onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                     isCurrentSongLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
                     onSongClick = { audioViewModel.playSong(it) },
+                    searchQuery = searchQuery
                 )
 
             }
