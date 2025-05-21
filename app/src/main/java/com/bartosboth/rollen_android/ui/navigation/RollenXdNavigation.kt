@@ -102,7 +102,7 @@ fun RollenXdNavigation() {
 
             composable<PlaylistDetailScreen> { backstackEntry ->
                 val playlistId =
-                    backstackEntry.arguments?.getLong(PlaylistDetailScreen.playlistIdArg) ?: -1L
+                    backstackEntry.arguments?.getLong(PlaylistDetailScreen.PLAYLIST_ID_ARG) ?: -1L
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
@@ -176,6 +176,19 @@ fun RollenXdNavigation() {
                     onPlayPause = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                     onNext = { audioViewModel.onUiEvent(UiEvents.Next) },
                 )
+            }
+
+            composable<SearchScreen> {backstackEntry ->
+                val parentEntry = remember(backstackEntry) {
+                    navController.getBackStackEntry(MainFlow)
+                }
+
+                val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
+                val userDetailViewModel: UserDetailViewModel = hiltViewModel(parentEntry)
+                val userDetails by userDetailViewModel.userDetails.collectAsState()
+
+                SearchScreen()
+
             }
 
             composable<ProfileScreen> {backstackEntry ->
