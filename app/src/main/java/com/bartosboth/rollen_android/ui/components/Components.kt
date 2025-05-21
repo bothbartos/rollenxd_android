@@ -75,8 +75,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
-import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
+import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.utils.convertBase64ToByteArr
 import com.bartosboth.rollen_android.utils.timeStampToDuration
 

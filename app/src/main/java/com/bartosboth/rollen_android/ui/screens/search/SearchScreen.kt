@@ -1,17 +1,11 @@
 package com.bartosboth.rollen_android.ui.screens.search
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,7 +38,6 @@ import androidx.navigation.NavController
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
-import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.components.SongListRowItem
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
