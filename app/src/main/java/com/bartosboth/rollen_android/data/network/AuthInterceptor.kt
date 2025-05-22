@@ -1,7 +1,8 @@
 package com.bartosboth.rollen_android.data.network
 
+import android.os.Handler
+import android.os.Looper
 import com.bartosboth.rollen_android.data.manager.TokenManager
-import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -23,7 +24,15 @@ class AuthInterceptor @Inject constructor(
         }else{
             originalRequest
         }
-        return chain.proceed(modifiedRequest)
+        val response = chain.proceed(modifiedRequest)
+
+        if (response.code == 401) {
+            Handler(Looper.getMainLooper()).post {
+                tokenManager.logout()
+
+            }
+        }
+        return response
     }
 
 }
