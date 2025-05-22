@@ -1,6 +1,11 @@
 package com.bartosboth.rollen_android.ui.components
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,8 +27,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -35,6 +44,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -57,6 +67,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -731,6 +743,135 @@ fun AppTopBar(
     )
 }
 
+@Composable
+fun WelcomeLogo(){
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = Modifier.size(100.dp),
+            painter = painterResource(R.drawable.rollenxdicon),
+            contentDescription = "RollenXD Logo"
+        )
+        Text(
+            text = "Welcome to RollenXD",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+    }
+}
+
+@Composable
+fun UploadFab(
+    onUploadSong: () -> Unit,
+    onCreatePlaylist: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Box(contentAlignment = Alignment.BottomEnd) {
+        FloatingActionButton(
+            onClick = { showMenu = !showMenu },
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                imageVector = if (showMenu) Icons.Filled.Close else Icons.Filled.Add,
+                contentDescription = if (showMenu) "Close menu" else "Open menu",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showMenu,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+        ) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 72.dp)
+            ) {
+                FabOption(
+                    icon = painterResource(R.drawable.music_note),
+                    label = "Upload Song",
+                    onClick = {
+                        onUploadSong()
+                        showMenu = false
+                    }
+                )
+
+                FabOption(
+                    icon = Icons.AutoMirrored.Filled.List,
+                    label = "Create Playlist",
+                    onClick = {
+                        onCreatePlaylist()
+                        showMenu = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FabOption(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+@Composable
+fun FabOption(
+    icon: Painter,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Icon(
+            painter = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+
+
 @Preview
 @Composable
 fun BottomBarPreview(){
@@ -762,26 +903,4 @@ fun BottomBarPreview(){
         ),
         isLiked = false,
     )
-}
-
-@Composable
-fun WelcomeLogo(){
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            modifier = Modifier.size(100.dp),
-            painter = painterResource(R.drawable.rollenxdicon),
-            contentDescription = "RollenXD Logo"
-        )
-        Text(
-            text = "Welcome to RollenXD",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-    }
 }

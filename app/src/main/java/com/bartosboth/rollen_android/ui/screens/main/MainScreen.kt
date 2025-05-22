@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +34,7 @@ import com.bartosboth.rollen_android.ui.components.ErrorMessage
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.PlaylistListItem
 import com.bartosboth.rollen_android.ui.components.SongListItem
+import com.bartosboth.rollen_android.ui.components.UploadFab
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.ui.navigation.ProfileScreen
@@ -75,7 +80,14 @@ fun MainScreen(
                 userDetail = userDetail,
                 currentPlayingAudioId = currentPlayingAudio.id,
                 isLiked = isLiked
-                )
+            )
+        },
+        floatingActionButton = {
+            UploadFab(
+                onUploadSong = {  },
+                onCreatePlaylist = { /* Handle later */ }
+            )
+
         }
     ) { innerPadding ->
         Box(
@@ -137,14 +149,17 @@ fun MainScreen(
                         )
                         LazyRow {
                             itemsIndexed(playlists) { index, playlist ->
-                                Log.d("PLAYLISTMAINSCREEN", "MainScreen: Playlist id: ${playlist.id} currentplaylist id ${currentPlayingPlaylist.id}")
-                                if(playlist.author == userDetail.name){
+                                Log.d(
+                                    "PLAYLISTMAINSCREEN",
+                                    "MainScreen: Playlist id: ${playlist.id} currentplaylist id ${currentPlayingPlaylist.id}"
+                                )
+                                if (playlist.author == userDetail.name) {
                                     PlaylistListItem(
                                         playlist = playlist.copy(author = "You"),
                                         isPlaying = playlist.id == currentPlayingPlaylist.id,
                                         onClick = { onPlaylistClick(playlist.id) },
                                     )
-                                }else{
+                                } else {
                                     PlaylistListItem(
                                         playlist = playlist,
                                         isPlaying = playlist.id == currentPlayingPlaylist.id,
