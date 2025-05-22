@@ -2,6 +2,7 @@ package com.bartosboth.rollen_android.ui.components
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -885,10 +886,24 @@ fun UploadSongDialog(
     var title by remember { mutableStateOf("") }
     var audioUri by remember { mutableStateOf<Uri?>(null) }
     var coverUri by remember { mutableStateOf<Uri?>(null) }
+    var audioError by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
 
     val audioLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> audioUri = uri }
+    ) { uri ->
+        uri?.let {
+            val mimeType = context.contentResolver.getType(it)
+            if (mimeType == "audio/mpeg") {
+                audioUri = uri
+                audioError = null
+            } else {
+                audioError = "Please select an MP3 file"
+                Toast.makeText(context, "Please select an MP3 file", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()

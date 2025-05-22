@@ -89,31 +89,25 @@ class AudioRepository @Inject constructor(
     }
 
     private fun createMultipartFromUri(uri: Uri, paramName: String, fileType: String): MultipartBody.Part {
-        // Get file name from URI
         val fileName = getFileNameFromUri(uri) ?: "${fileType}_${System.currentTimeMillis()}"
 
-        // Create temp file
         val tempFile = File(context.cacheDir, fileName)
         tempFile.createNewFile()
 
-        // Copy content
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             FileOutputStream(tempFile).use { outputStream ->
                 inputStream.copyTo(outputStream)
             }
         }
 
-        // Get actual MIME type from ContentResolver
         val mimeType = context.contentResolver.getType(uri) ?: when (fileType) {
             "audio" -> "audio/*"
             "image" -> "image/*"
             else -> "application/octet-stream"
         }
 
-        // Create RequestBody with the detected MIME type
         val requestFile = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
 
-        // Create MultipartBody.Part
         return MultipartBody.Part.createFormData(paramName, fileName, requestFile)
     }
 
