@@ -1,5 +1,6 @@
 package com.bartosboth.rollen_android.ui.screens.main
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,14 +28,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
-import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.song.Song
+import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.ui.components.AppTopBar
 import com.bartosboth.rollen_android.ui.components.ErrorMessage
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.PlaylistListItem
 import com.bartosboth.rollen_android.ui.components.SongListItem
 import com.bartosboth.rollen_android.ui.components.UploadFab
+import com.bartosboth.rollen_android.ui.components.UploadSongDialog
 import com.bartosboth.rollen_android.ui.navigation.MainScreen
 import com.bartosboth.rollen_android.ui.navigation.PlayerScreen
 import com.bartosboth.rollen_android.ui.navigation.ProfileScreen
@@ -57,8 +59,22 @@ fun MainScreen(
     onPlaylistClick: (Long) -> Unit,
     onLike: (Long) -> Unit,
     uiState: UiState,
+    onUploadSong: (String, Uri?, Uri?) -> Unit,
     isLiked: Boolean
 ) {
+
+    var showUploadSongDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (showUploadSongDialog) {
+        UploadSongDialog(
+            onDismiss = { showUploadSongDialog = false },
+            onUpload = {title, audioFile, coverImage ->
+                onUploadSong(title, audioFile, coverImage)
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -84,7 +100,7 @@ fun MainScreen(
         },
         floatingActionButton = {
             UploadFab(
-                onUploadSong = {  },
+                onUploadSong = { showUploadSongDialog = true },
                 onCreatePlaylist = { /* Handle later */ }
             )
 

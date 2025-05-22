@@ -98,7 +98,10 @@ fun RollenXdNavigation() {
                     onStart = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                     onLike = { likeViewModel.toggleLike(audioViewModel.currentSelectedAudio.id) },
                     uiState = audioViewModel.uiState.collectAsState().value,
-                    isLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id)
+                    isLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
+                    onUploadSong = { title, audioFile, coverImage ->
+                        audioViewModel.uploadSong(title, audioFile, coverImage)
+                    }
                 )
             }
 

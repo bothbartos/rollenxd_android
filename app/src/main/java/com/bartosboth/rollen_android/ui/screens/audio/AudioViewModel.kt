@@ -3,6 +3,7 @@ package com.bartosboth.rollen_android.ui.screens.audio
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -223,6 +225,20 @@ class AudioViewModel @Inject constructor(
                     songServiceHandler.playStreamingAudio(songId)
                 }
             } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun uploadSong(title: String, audioFile: Uri?, coverImage: Uri?) {
+        viewModelScope.launch {
+            try{
+                val response = audioRepo.uploadSong(title, audioFile, coverImage)
+                if(response == 200){
+                    loadAudioData()
+                }
+            }catch (e: Exception){
+                Log.d("UPLOAD_ERR", "uploadSong: ${e.message}")
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
