@@ -1,6 +1,15 @@
 package com.bartosboth.rollen_android.ui.components
 
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,8 +31,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -35,6 +49,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -43,6 +58,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,6 +73,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -71,6 +89,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bartosboth.rollen_android.R
@@ -731,6 +750,269 @@ fun AppTopBar(
     )
 }
 
+@Composable
+fun WelcomeLogo(){
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            modifier = Modifier.size(100.dp),
+            painter = painterResource(R.drawable.rollenxdicon),
+            contentDescription = "RollenXD Logo"
+        )
+        Text(
+            text = "Welcome to RollenXD",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+    }
+}
+
+@Composable
+fun UploadFab(
+    onUploadSong: () -> Unit,
+    onCreatePlaylist: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Box(contentAlignment = Alignment.BottomEnd) {
+        FloatingActionButton(
+            onClick = { showMenu = !showMenu },
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                imageVector = if (showMenu) Icons.Filled.Close else Icons.Filled.Add,
+                contentDescription = if (showMenu) "Close menu" else "Open menu",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showMenu,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+        ) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 72.dp)
+            ) {
+                FabOption(
+                    icon = painterResource(R.drawable.music_note),
+                    label = "Upload Song",
+                    onClick = {
+                        onUploadSong()
+                        showMenu = false
+                    }
+                )
+
+                FabOption(
+                    icon = Icons.AutoMirrored.Filled.List,
+                    label = "Create Playlist",
+                    onClick = {
+                        onCreatePlaylist()
+                        showMenu = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FabOption(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+@Composable
+fun FabOption(
+    icon: Painter,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Icon(
+            painter = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+
+@Composable
+fun UploadSongDialog(
+    onDismiss: () -> Unit,
+    onUpload: (title: String, audioFile: Uri?, coverImage: Uri?) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var audioUri by remember { mutableStateOf<Uri?>(null) }
+    var coverUri by remember { mutableStateOf<Uri?>(null) }
+    var audioError by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+
+    val audioLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val mimeType = context.contentResolver.getType(it)
+            if (mimeType == "audio/mpeg") {
+                audioUri = uri
+                audioError = null
+            } else {
+                audioError = "Please select an MP3 file"
+                Toast.makeText(context, "Please select an MP3 file", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> coverUri = uri }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Upload Song",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Song Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { audioLauncher.launch("audio/*") },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Select Audio File")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (audioUri != null) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Audio selected",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { imageLauncher.launch("image/*") },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Select Cover Image")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (coverUri != null) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Image selected",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            onUpload(title, audioUri, coverUri)
+                            onDismiss()
+                        },
+                        enabled = title.isNotBlank() && audioUri != null && coverUri != null
+                    ) {
+                        Text("Upload")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 @Preview
 @Composable
 fun BottomBarPreview(){
@@ -762,26 +1044,4 @@ fun BottomBarPreview(){
         ),
         isLiked = false,
     )
-}
-
-@Composable
-fun WelcomeLogo(){
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            modifier = Modifier.size(100.dp),
-            painter = painterResource(R.drawable.rollenxdicon),
-            contentDescription = "RollenXD Logo"
-        )
-        Text(
-            text = "Welcome to RollenXD",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-    }
 }
