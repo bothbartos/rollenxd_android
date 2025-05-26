@@ -31,6 +31,7 @@ import com.bartosboth.rollen_android.ui.screens.register.RegisterScreen
 import com.bartosboth.rollen_android.ui.screens.register.RegisterViewModel
 import com.bartosboth.rollen_android.ui.screens.search.SearchScreen
 import com.bartosboth.rollen_android.ui.screens.search.SearchViewModel
+import com.bartosboth.rollen_android.ui.screens.songDetail.CommentViewModel
 
 
 @Composable
@@ -106,6 +107,25 @@ fun RollenXdNavigation() {
                         audioViewModel.createPlaylist(title, songId)
                     }
                 )
+            }
+
+            composable<SongDetailScreen> {backstackEntry ->
+                val songId =
+                    backstackEntry.arguments?.getLong(SongDetailScreen.SONG_ID_ARG) ?: -1L
+                val parentEntry = remember(backstackEntry) {
+                    navController.getBackStackEntry(MainFlow)
+                }
+                val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
+                val userDetailViewModel: UserDetailViewModel = hiltViewModel(parentEntry)
+                val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
+                val commentViewModel: CommentViewModel = hiltViewModel(parentEntry)
+
+                val userDetails by userDetailViewModel.userDetails.collectAsStateWithLifecycle()
+                val likedSongIds = likeViewModel.likedSongIds.collectAsState()
+
+
+
+
             }
 
             composable<PlaylistDetailScreen> { backstackEntry ->

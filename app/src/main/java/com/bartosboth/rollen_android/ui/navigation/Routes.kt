@@ -28,4 +28,11 @@ data class PlaylistDetailScreen(val playlistId: Long) {
 }
 
 @Serializable
+data class SongDetailScreen(val songId: Long){
+    companion object{
+        const val SONG_ID_ARG = "songId"
+    }
+}
+
+@Serializable
 object SearchScreen
