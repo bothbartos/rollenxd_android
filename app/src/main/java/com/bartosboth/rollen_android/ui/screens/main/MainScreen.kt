@@ -109,7 +109,7 @@ fun MainScreen(
                 onHomeClick = { navController.navigate(MainScreen) },
                 onSearchClick = { navController.navigate(SearchScreen) },
                 onProfileClick = { navController.navigate(ProfileScreen) },
-                onBarClick = { navController.navigate(PlayerScreen) },
+                onBarClick = { navController.navigate(PlayerScreen(currentPlayingAudio.id)) },
                 userDetail = userDetail,
                 currentPlayingAudioId = currentPlayingAudio.id,
                 isLiked = isLiked

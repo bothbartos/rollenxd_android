@@ -15,7 +15,11 @@ object MainFlow
 object MainScreen
 
 @Serializable
-object PlayerScreen
+data class PlayerScreen(val songId: Long){
+    companion object {
+        const val SONG_ID_ARG = "songId"
+    }
+}
 
 @Serializable
 object ProfileScreen

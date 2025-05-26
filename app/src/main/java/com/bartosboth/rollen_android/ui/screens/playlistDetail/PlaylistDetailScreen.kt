@@ -47,7 +47,7 @@ fun PlaylistDetailScreen(
     isAudioPlaying: Boolean,
     currentPlayingAudio: Song,
     onCurrentSongLike: (Long) -> Unit,
-    onSongLike: (Song) -> Unit,
+    onSongLike: (Long) -> Unit,
     playPlaylist: (Long) -> Unit,
     userDetail: UserDetail,
     onStart: () -> Unit,
@@ -207,7 +207,7 @@ fun PlaylistSongRow(
     surfaceColour: Color,
     song: Song,
     playlistId: Long,
-    onSongLike: (Song) -> Unit,
+    onSongLike: (Long) -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
     isLiked: Boolean
     ){
@@ -250,7 +250,7 @@ fun PlaylistSongRow(
             }
             LikeButton(
                 isLiked = isLiked,
-                onClick = { onSongLike(song) }
+                onClick = { onSongLike(song.id) }
             )
         }
     }
