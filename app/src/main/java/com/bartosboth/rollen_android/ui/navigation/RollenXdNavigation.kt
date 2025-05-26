@@ -101,6 +101,9 @@ fun RollenXdNavigation() {
                     isLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
                     onUploadSong = { title, audioFile, coverImage ->
                         audioViewModel.uploadSong(title, audioFile, coverImage)
+                    },
+                    onCreatePlaylist = {title, songId ->
+                        audioViewModel.createPlaylist(title, songId)
                     }
                 )
             }

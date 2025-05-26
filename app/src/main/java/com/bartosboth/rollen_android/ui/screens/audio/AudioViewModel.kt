@@ -18,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.saveable
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.bartosboth.rollen_android.data.manager.TokenManager
+import com.bartosboth.rollen_android.data.model.playlist.NewPlaylist
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
@@ -242,6 +243,21 @@ class AudioViewModel @Inject constructor(
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun createPlaylist(title: String, songId: List<Long>){
+        viewModelScope.launch {
+            try{
+                val response = playlistRepo.createPlaylist(NewPlaylist(title, songId))
+                if(response == 200){
+                    loadAudioData()
+                }
+            }catch (e: Exception){
+                Log.d("UPLOAD_ERR", "uploadSong: ${e.message}")
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+            }
+        }
+
     }
 
     fun onUiEvent(uiEvents: UiEvents) {

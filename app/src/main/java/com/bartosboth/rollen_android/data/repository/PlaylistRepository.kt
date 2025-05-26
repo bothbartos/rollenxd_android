@@ -1,6 +1,7 @@
 package com.bartosboth.rollen_android.data.repository
 
 import android.util.Log
+import com.bartosboth.rollen_android.data.model.playlist.NewPlaylist
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
@@ -56,5 +57,19 @@ class PlaylistRepository @Inject constructor(
             throw HttpException(response)
         }
         response.body()!!
+    }
+
+    suspend fun createPlaylist(playlist: NewPlaylist): Int = withContext(Dispatchers.IO) {
+        val response = playlistAPI.addPlaylist(playlist)
+        if (response.isSuccessful) {
+            response.body() ?: throw IllegalStateException("Response body is null")
+        } else {
+            Log.e(
+                "AudioRepository",
+                "Error creating playlist: ${response.code()} - ${response.message()}"
+            )
+            throw HttpException(response)
+        }
+        response.code()
     }
 }
