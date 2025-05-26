@@ -22,4 +22,15 @@ class CommentRepository @Inject constructor(
         response.body()!!
     }
 
+    suspend fun addComment(songId: Long, text: String): Comment = withContext(Dispatchers.IO) {
+        val response = commentAPI.addComment(songId, text)
+        if (response.isSuccessful) {
+            response.body() ?: throw IllegalStateException("Response body is null")
+        } else {
+            throw HttpException(response)
+        }
+        response.body()!!
+    }
+
+
 }

@@ -3,6 +3,9 @@ package com.bartosboth.rollen_android.data.network
 import com.bartosboth.rollen_android.data.model.comment.Comment
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import javax.inject.Singleton
 
@@ -10,4 +13,11 @@ import javax.inject.Singleton
 interface CommentAPI {
     @GET("api/comment/id/{id}")
     suspend fun getCommentsBySongId(@Path("id") id: Long): Response<List<Comment>>
+
+    @Multipart
+    @POST("api/comment/addComment")
+    suspend fun addComment(
+        @Part("songId") songId: Long,
+        @Part("text") text: String
+    ): Response<Comment>
 }

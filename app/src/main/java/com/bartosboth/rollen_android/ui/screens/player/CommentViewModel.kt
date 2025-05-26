@@ -38,6 +38,22 @@ class CommentViewModel @Inject constructor(
         }
     }
 
+    fun addComment(songId: Long, text: String){
+        viewModelScope.launch {
+            try{
+                _commentState.value = CommentState.Loading
+                Log.d("ADD_COMMENT", "addComment: $text")
+                val response = commentRepository.addComment(songId, text)
+                response.let {
+                    _commentState.value = CommentState.Success
+                    getComments(songId)
+                }
+            }catch (e: Exception){
+                _commentState.value = CommentState.Error("Loading error: ${e.message}")
+            }
+        }
+    }
+
 }
 
 sealed class CommentState {
