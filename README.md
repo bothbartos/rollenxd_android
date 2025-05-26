@@ -135,8 +135,9 @@ Your IP address is the number after “IPv4 Address” (e.g., 192.168.1.100).
 <img src="screenshots/main_screen.png" width="300" alt="Main Screen">
 <img src="screenshots/player_screen.png" width="300" alt="Player Screen">
 <img src="screenshots/profile_edit.png" width="300" alt="Profile Edit">
+<img src="screenshots/search_screen.png" width="300" alt="Search Screen">
+<img src="screenshots/upload_song_dialog.png" width="300" alt="Upload Dialog">
+<img src="screenshots/create_playlist_dialog.png" width="300" alt="Create Dialog">
 
 ## Planned Features:
- - Upload songs and create playlists
- - Search for songs and playlists
  - Comment on songs
