@@ -31,6 +31,7 @@ import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.ui.components.AppTopBar
+import com.bartosboth.rollen_android.ui.components.CreatePlaylistDialog
 import com.bartosboth.rollen_android.ui.components.ErrorMessage
 import com.bartosboth.rollen_android.ui.components.MiniPlayerBar
 import com.bartosboth.rollen_android.ui.components.PlaylistListItem
@@ -60,10 +61,15 @@ fun MainScreen(
     onLike: (Long) -> Unit,
     uiState: UiState,
     onUploadSong: (String, Uri?, Uri?) -> Unit,
+    onCreatePlaylist: (String, List<Long>) -> Unit,
     isLiked: Boolean
 ) {
 
     var showUploadSongDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showPlaylistCreationDialog by remember {
         mutableStateOf(false)
     }
 
@@ -73,6 +79,17 @@ fun MainScreen(
             onUpload = {title, audioFile, coverImage ->
                 onUploadSong(title, audioFile, coverImage)
             }
+        )
+    }
+
+    if(showPlaylistCreationDialog){
+        CreatePlaylistDialog(
+            onDismiss = { showPlaylistCreationDialog = false },
+            onCreate = { title, songId ->
+                onCreatePlaylist(title, songId)
+
+            },
+            songs = audioList,
         )
     }
 
@@ -101,7 +118,7 @@ fun MainScreen(
         floatingActionButton = {
             UploadFab(
                 onUploadSong = { showUploadSongDialog = true },
-                onCreatePlaylist = { /* Handle later */ }
+                onCreatePlaylist = { showPlaylistCreationDialog = true }
             )
 
         }

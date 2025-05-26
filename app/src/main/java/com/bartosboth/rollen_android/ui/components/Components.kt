@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,7 +39,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -319,7 +320,7 @@ fun ProgressSlider(
     totalDuration: Double,
     onSeek: (Float) -> Unit
 ) {
-    var sliderPosition by remember  { mutableFloatStateOf(progress / 100f) }
+    var sliderPosition by remember { mutableFloatStateOf(progress / 100f) }
     var isSeeking by remember { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
@@ -391,7 +392,7 @@ fun SongListItem(
             .clickable { onClick() },
         colors = cardColors,
 
-    ) {
+        ) {
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(8.dp)
@@ -422,6 +423,7 @@ fun SongListItem(
         }
     }
 }
+
 @Composable
 fun SongListRowItem(
     modifier: Modifier = Modifier,
@@ -462,7 +464,7 @@ fun SongListRowItem(
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            Column(modifier = Modifier.weight(1f)){
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = song.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -568,13 +570,13 @@ fun MiniPlayerBar(
     isLiked: Boolean
 ) {
     BottomAppBar(
-        modifier = Modifier.height(if(currentPlayingAudioId == -1L) 91.dp else 150.dp),
+        modifier = Modifier.height(if (currentPlayingAudioId == -1L) 91.dp else 150.dp),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         content = {
             Column(
                 modifier = Modifier.padding(8.dp)
             ) {
-                if(currentPlayingAudioId != -1L){
+                if (currentPlayingAudioId != -1L) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -584,7 +586,7 @@ fun MiniPlayerBar(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
 
-                    ) {
+                        ) {
                         CoverImage(
                             coverBase64 = audio.coverBase64,
                             songId = audio.id,
@@ -597,7 +599,7 @@ fun MiniPlayerBar(
                             modifier = Modifier.weight(1f)
                         )
 
-                        LikeButton(isLiked = isLiked, onClick = { onLike(audio.id)})
+                        LikeButton(isLiked = isLiked, onClick = { onLike(audio.id) })
 
                         PlayPauseButton(
                             isPlaying = isAudioPlaying,
@@ -617,9 +619,11 @@ fun MiniPlayerBar(
                         .padding(top = 8.dp)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     horizontalArrangement = Arrangement.SpaceEvenly,
-                ){
-                    Box(modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center) {
+                ) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
                         IconButton(onClick = onHomeClick) {
                             Icon(
                                 imageVector = Icons.Filled.Home,
@@ -628,8 +632,10 @@ fun MiniPlayerBar(
                         }
                     }
 
-                    Box(modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
                         IconButton(onClick = onSearchClick) {
                             Icon(
                                 imageVector = Icons.Filled.Search,
@@ -638,8 +644,10 @@ fun MiniPlayerBar(
                         }
                     }
 
-                    Box(modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center){
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularBase64ImageButton(
                             userDetail = userDetail,
                             onClick = onProfileClick,
@@ -751,8 +759,8 @@ fun AppTopBar(
 }
 
 @Composable
-fun WelcomeLogo(){
-    Column (
+fun WelcomeLogo() {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
@@ -850,6 +858,7 @@ fun FabOption(
         )
     }
 }
+
 @Composable
 fun FabOption(
     icon: Painter,
@@ -1011,11 +1020,94 @@ fun UploadSongDialog(
     }
 }
 
+@Composable
+fun CreatePlaylistDialog(
+    onDismiss: () -> Unit,
+    onCreate: (title: String, songId: List<Long>) -> Unit,
+    songs: List<Song>
+) {
+    var title by remember { mutableStateOf("") }
+    var songIds by remember { mutableStateOf(emptyList<Long>()) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Create Playlist",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Playlist Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn {
+                    itemsIndexed(songs) { index, song ->
+                        SongListRowItem(
+                            song = song,
+                            isPlaying = songIds.contains(song.id),
+                            onClick = {
+                                songIds = if (songIds.contains(song.id)) {
+                                    songIds.filter { it != song.id }
+                                } else {
+                                    songIds + song.id
+                                }
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text("Cancel")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    onCreate(title, songIds)
+                                    onDismiss()
+                                },
+                                enabled = title.isNotBlank() && songIds.isNotEmpty()
+                            ) {
+                                Text("Create Playlist")
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+    }
+
+}
 
 
 @Preview
 @Composable
-fun BottomBarPreview(){
+fun BottomBarPreview() {
     MiniPlayerBar(
         progress = 1.0f,
         audio = Song(
@@ -1028,11 +1120,11 @@ fun BottomBarPreview(){
             id = 1L
         ),
         isAudioPlaying = true,
-        onPlayPauseClick = {  },
-        onBarClick = {  },
+        onPlayPauseClick = { },
+        onBarClick = { },
         onLike = { },
         onHomeClick = {},
-        onSearchClick = {  },
+        onSearchClick = { },
         onProfileClick = {},
         userDetail = UserDetail(
             id = 1L,
