@@ -1,6 +1,6 @@
 # RollenXD - Music Sharing and Listening Platform
 
-RollenXD is a full-stack music sharing and listening platform. In the Android application users can listen to and like songs, playlists, and edit their profile, but in the Web application they can upload songs, create playlists, search for songs/playlists by their name or by username and comment on songs. The Android application is developed using Jetpack Compose with Hilt, Retrofit, ExoPlayer3 and Coil. The Web application's frontend is built with React.js (Vite), while the backend is developed using Spring Boot with PostgreSQL as the database.
+RollenXD is a full-stack music sharing and listening platform. Users can listen to songs and playlists, like and comment on songs, upload songs, create playlists, search for songs by their title or by username and edit their profile. The Android application is developed using Jetpack Compose with Hilt, Retrofit, Media3 and Coil. The Web application's frontend is built with React.js (Vite), while the backend is developed using Spring Boot with PostgreSQL as the database.
 
 ## Table of Contents
 - [Technologies Used](#technologies-used)
@@ -60,8 +60,6 @@ To stop the running containers:
 docker-compose down
 
 ```
-### 3. Register and add a few songs and playlists through website (http://localhost)
-
 ---
 
 ### Network Setup
@@ -119,12 +117,13 @@ Your IP address is the number after “IPv4 Address” (e.g., 192.168.1.100).
 
 ## Quick Start 
 
-1. Register or log in through the web interface.
-2. Upload songs or playlists.
-3. Build and run the Android app and enjoy your music:
+1. Build and run the Android app through Android Studio.
    - [Virtual Device Setup](https://developer.android.com/studio/run/emulator)
    - [Local Device Setup](https://developer.android.com/studio/run/device)
-  
+2. Register with a new user.
+3. Upload songs or playlists.
+4. Enjoy your music:
+   
 
 ---
 
