@@ -1,7 +1,6 @@
 package com.bartosboth.rollen_android.ui.screens.main
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.manager.TokenManager

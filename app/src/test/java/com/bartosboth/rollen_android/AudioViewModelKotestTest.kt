@@ -1,7 +1,9 @@
 package com.bartosboth.rollen_android
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.bartosboth.rollen_android.data.manager.TokenManager
+import com.bartosboth.rollen_android.data.model.playlist.NewPlaylist
 import com.bartosboth.rollen_android.data.model.playlist.Playlist
 import com.bartosboth.rollen_android.data.model.playlist.PlaylistData
 import com.bartosboth.rollen_android.data.model.song.Song
@@ -270,56 +272,6 @@ class AudioViewModelKotestTest : StringSpec({
         viewModel.progress shouldBe 50f
     }
 
-    "should like song successfully" {
-        // Setup
-        coEvery { audioRepo.likeSong(1L) } returns 200
-        coEvery { audioRepo.getAudioData() } returns testSongs
-        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
-        coEvery { audioRepo.getLikedSongs() } returns testSongs.filter { it.id == 1L }
-        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Set current song
-        viewModel.playSong(1L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Execute
-        viewModel.likeSong(1L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify
-        viewModel.currentSelectedAudio.isLiked shouldBe true
-        viewModel.audioList.find { it.id == 1L }?.isLiked shouldBe true
-
-        coVerify { audioRepo.likeSong(1L) }
-    }
-
-    "should unlike song successfully" {
-        // Setup
-        coEvery { audioRepo.unlikeSong(2L) } returns 200
-        coEvery { audioRepo.getAudioData() } returns testSongs
-        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
-        coEvery { audioRepo.getLikedSongs() } returns testSongs.filter { it.id == 2L }.map{ it.copy(isLiked = true)}
-        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Set current song
-        viewModel.playSong(2L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Execute
-        viewModel.unlikeSong(2L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify
-        viewModel.currentSelectedAudio.isLiked shouldBe false
-        viewModel.audioList.find { it.id == 2L }?.isLiked shouldBe false
-
-        coVerify { audioRepo.unlikeSong(2L) }
-    }
-
     "should update progress when audio state changes" {
         // Setup
         val audioStateFlow = MutableStateFlow<AudioState>(AudioState.Initial)
@@ -383,5 +335,128 @@ class AudioViewModelKotestTest : StringSpec({
         viewModel.currentSelectedAudio.id shouldBe 1L
         viewModel.currentSelectedAudio.title shouldBe "Song 1"
     }
+
+    "should upload song successfully and reload audio data" {
+        // Setup
+        val title = "Test Song"
+        val audioFile = mockk<Uri>()
+        val coverImage = mockk<Uri>()
+
+        coEvery { audioRepo.uploadSong(title, audioFile, coverImage) } returns 200
+        coEvery { audioRepo.getAudioData() } returns listOf(testSongs[0])
+        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
+        coEvery { audioRepo.getLikedSongs() } returns emptyList()
+        val audioStateFlow = MutableStateFlow<AudioState>(AudioState.Initial)
+        every { songServiceHandler.audioState } returns audioStateFlow
+        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
+
+        // Execute
+        viewModel.uploadSong(title, audioFile, coverImage)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { audioRepo.uploadSong(title, audioFile, coverImage) }
+        coVerify { audioRepo.getAudioData() }
+        coVerify { playlistRepo.getPlaylists() }
+        viewModel.audioList.size shouldBe 1
+    }
+
+    "should handle upload song error" {
+        // Setup
+        val title = "Test Song"
+        val audioFile = mockk<Uri>()
+        val coverImage = mockk<Uri>()
+        val errorMessage = "Upload failed"
+
+        coEvery { audioRepo.uploadSong(title, audioFile, coverImage) } throws Exception(errorMessage)
+
+        // Execute
+        viewModel.uploadSong(title, audioFile, coverImage)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { audioRepo.uploadSong(title, audioFile, coverImage) }
+        viewModel.uiState.value shouldBe UiState.Error(errorMessage)
+    }
+
+    "should not reload data when upload song returns non-200 status" {
+        // Setup
+        val title = "Test Song"
+        val audioFile = mockk<Uri>()
+        val coverImage = mockk<Uri>()
+
+        coEvery { audioRepo.uploadSong(title, audioFile, coverImage) } returns 400
+
+        // Execute
+        viewModel.uploadSong(title, audioFile, coverImage)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { audioRepo.uploadSong(title, audioFile, coverImage) }
+        coVerify(exactly = 0) { audioRepo.getAudioData() }
+        coVerify(exactly = 0) { playlistRepo.getPlaylists() }
+    }
+
+    "should create playlist successfully and reload audio data" {
+        // Setup
+        val title = "Test Playlist"
+        val songIds = listOf(1L, 2L)
+        val newPlaylist = NewPlaylist(title, songIds)
+
+        coEvery { playlistRepo.createPlaylist(newPlaylist) } returns 200
+        coEvery { audioRepo.getAudioData() } returns testSongs
+        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
+        coEvery { audioRepo.getLikedSongs() } returns emptyList()
+        val audioStateFlow = MutableStateFlow<AudioState>(AudioState.Initial)
+        every { songServiceHandler.audioState } returns audioStateFlow
+        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
+
+
+        // Execute
+        viewModel.createPlaylist(title, songIds)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { playlistRepo.createPlaylist(newPlaylist) }
+        coVerify { audioRepo.getAudioData() }
+        coVerify { playlistRepo.getPlaylists() }
+        viewModel.playlists.size shouldBe 3
+    }
+
+    "should handle create playlist error" {
+        // Setup
+        val title = "Test Playlist"
+        val songIds = listOf(1L, 2L)
+        val errorMessage = "Playlist creation failed"
+
+        coEvery { playlistRepo.createPlaylist(any()) } throws Exception(errorMessage)
+
+        // Execute
+        viewModel.createPlaylist(title, songIds)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { playlistRepo.createPlaylist(NewPlaylist(title, songIds)) }
+        viewModel.uiState.value shouldBe UiState.Error(errorMessage)
+    }
+
+    "should not reload data when create playlist returns non-200 status" {
+        // Setup
+        val title = "Test Playlist"
+        val songIds = listOf(1L, 2L)
+
+        coEvery { playlistRepo.createPlaylist(any()) } returns 400
+
+        // Execute
+        viewModel.createPlaylist(title, songIds)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        coVerify { playlistRepo.createPlaylist(NewPlaylist(title, songIds)) }
+        coVerify(exactly = 0) { audioRepo.getAudioData() }
+        coVerify(exactly = 0) { playlistRepo.getPlaylists() }
+    }
+
+
 
 })

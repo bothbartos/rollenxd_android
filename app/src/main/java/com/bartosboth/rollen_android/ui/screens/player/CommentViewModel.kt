@@ -1,6 +1,5 @@
 package com.bartosboth.rollen_android.ui.screens.player
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.model.comment.Comment
@@ -31,7 +30,6 @@ class CommentViewModel @Inject constructor(
                     _comments.value = it
                     _commentState.value = CommentState.Success
                 }
-                Log.d("COMMENT_VM", "getComments: ${comments.value.size}")
             }catch (e: Exception){
                 _commentState.value = CommentState.Error("Loading error: ${e.message}")
             }
@@ -42,15 +40,13 @@ class CommentViewModel @Inject constructor(
         viewModelScope.launch {
             try{
                 _commentState.value = CommentState.Loading
-                Log.d("ADD_COMMENT", "addComment: $text")
                 val response = commentRepository.addComment(songId, text)
-                Log.d("ADD_COMMENT_RESPONSE", "addComment: ${response.text}")
+
                 response.let {
                     _commentState.value = CommentState.Success
-                    _comments.value+= response
-                }
+                    _comments.value = _comments.value + response                }
             }catch (e: Exception){
-                _commentState.value = CommentState.Error("Loading error: ${e.message}")
+                _commentState.value = CommentState.Error("Error adding comment: ${e.message}")
             }
         }
     }
