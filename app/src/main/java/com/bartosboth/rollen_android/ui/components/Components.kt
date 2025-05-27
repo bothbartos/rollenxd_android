@@ -1058,7 +1058,9 @@ fun CreatePlaylistDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().height(400.dp)
+                ) {
                     itemsIndexed(songs) { index, song ->
                         SongListRowItem(
                             song = song,
@@ -1072,28 +1074,25 @@ fun CreatePlaylistDialog(
                             }
                         )
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            TextButton(onClick = onDismiss) {
-                                Text("Cancel")
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = {
-                                    onCreate(title, songIds)
-                                    onDismiss()
-                                },
-                                enabled = title.isNotBlank() && songIds.isNotEmpty()
-                            ) {
-                                Text("Create Playlist")
-                            }
-                        }
-
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            onCreate(title, songIds)
+                            onDismiss()
+                        },
+                        enabled = title.isNotBlank() && songIds.isNotEmpty()
+                    ) {
+                        Text("Create Playlist")
                     }
                 }
 
