@@ -3,14 +3,12 @@ package com.bartosboth.rollen_android.data.player.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.bartosboth.rollen_android.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

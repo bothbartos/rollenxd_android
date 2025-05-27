@@ -1,6 +1,5 @@
 package com.bartosboth.rollen_android.ui.screens.player
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.model.comment.Comment

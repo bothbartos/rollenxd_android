@@ -1,9 +1,6 @@
 package com.bartosboth.rollen_android.ui.screens.register
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.bartosboth.rollen_android.data.model.auth.RegisterRequest
-import com.bartosboth.rollen_android.data.network.AuthAPI
 import androidx.lifecycle.viewModelScope
 import com.bartosboth.rollen_android.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

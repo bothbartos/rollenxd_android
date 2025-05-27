@@ -3,7 +3,6 @@ package com.bartosboth.rollen_android.data.repository
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import com.bartosboth.rollen_android.data.model.user.UserDetail
 import com.bartosboth.rollen_android.data.model.user.UserUpdateDetail
 import com.bartosboth.rollen_android.data.network.UserDetailAPI

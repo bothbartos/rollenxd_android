@@ -17,7 +17,6 @@ import com.bartosboth.rollen_android.ui.screens.audio.UiEvents
 import com.bartosboth.rollen_android.ui.screens.audio.UiState
 import com.bartosboth.rollen_android.utils.Constants
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
