@@ -242,7 +242,6 @@ class AudioViewModel @Inject constructor(
                     loadAudioData()
                 }
             }catch (e: Exception){
-                Log.d("UPLOAD_ERR", "uploadSong: ${e.message}")
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
@@ -256,24 +255,11 @@ class AudioViewModel @Inject constructor(
                     loadAudioData()
                 }
             }catch (e: Exception){
-                Log.d("UPLOAD_ERR", "uploadSong: ${e.message}")
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
 
     }
-
-    fun getSongById(songID: Long) {
-        Log.d("AVM_GET_SONG", "Looking for songID: $songID")
-        Log.d("AVM_GET_SONG", "AudioList size: ${audioList.size}")
-        Log.d("AVM_GET_SONG", "AudioList IDs: ${audioList.map { it.id }}")
-
-        val foundSong = audioList.find { it.id == songID }
-        _song.value = foundSong
-
-        Log.d("AVM_GET_SONG", "Found song: ${foundSong?.title} with ID: ${foundSong?.id}")
-    }
-
 
     fun onUiEvent(uiEvents: UiEvents) {
         viewModelScope.launch {
