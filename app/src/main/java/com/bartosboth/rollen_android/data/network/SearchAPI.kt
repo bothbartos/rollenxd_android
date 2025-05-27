@@ -11,5 +11,5 @@ import retrofit2.http.Query
 interface SearchAPI {
 
     @GET("api/song/search")
-    suspend fun searchSongs(@Query("search")search: String): Response<List<Song>>
+    suspend fun searchSongs(@Query("search") search: String): Response<List<Song>>
 }

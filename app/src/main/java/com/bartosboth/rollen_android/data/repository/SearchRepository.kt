@@ -11,7 +11,7 @@ import javax.inject.Inject
 class SearchRepository @Inject constructor(
     private val searchAPI: SearchAPI
 ) {
-    suspend fun searchSongs(search: String) : List<Song> = withContext(Dispatchers.IO) {
+    suspend fun searchSongs(search: String): List<Song> = withContext(Dispatchers.IO) {
         val response = searchAPI.searchSongs(search)
         Log.d("SEARCH_REPO", "searchSongs: $search")
         if (response.isSuccessful) {

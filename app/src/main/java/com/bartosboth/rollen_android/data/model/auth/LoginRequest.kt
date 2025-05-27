@@ -5,6 +5,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class LoginRequest(
-     val username: String,
+    val username: String,
     val password: String
-):Parcelable
+) : Parcelable

@@ -32,7 +32,7 @@ class AuthRepository @Inject constructor(
     suspend fun register(username: String, email: String, password: String): Response<Void> {
         val registerRequest = RegisterRequest(username, email, password)
         val response = authService.register(registerRequest)
-        if(!response.isSuccessful){
+        if (!response.isSuccessful) {
             throw Exception(response.message())
         }
         return response
@@ -42,7 +42,4 @@ class AuthRepository @Inject constructor(
         tokenManager.logout()
     }
 
-    fun isLoggedIn(): Boolean {
-        return tokenManager.isLoggedIn()
-    }
 }

@@ -12,4 +12,4 @@ data class Song(
     var isLiked: Boolean,
     val reShares: Int,
     val id: Long
-    ): Parcelable
+) : Parcelable

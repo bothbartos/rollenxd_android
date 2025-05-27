@@ -11,4 +11,4 @@ data class Comment(
     val username: String,
     val profilePicture: String,
     val text: String
-): Parcelable
+) : Parcelable

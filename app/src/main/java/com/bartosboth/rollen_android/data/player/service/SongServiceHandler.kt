@@ -47,7 +47,7 @@ class SongServiceHandler @Inject constructor(
         exoPlayer.prepare()
     }
 
-    fun play(){
+    fun play() {
         startMediaService()
         exoPlayer.play()
 
@@ -64,7 +64,10 @@ class SongServiceHandler @Inject constructor(
 
         if (findMediaItemIndex(songId) == -1) {
             exoPlayer.addMediaItem(mediaItem)
-            Log.d("SongServiceHandler", "Added media item to playlist, count: ${exoPlayer.mediaItemCount}")
+            Log.d(
+                "SongServiceHandler",
+                "Added media item to playlist, count: ${exoPlayer.mediaItemCount}"
+            )
         }
         if (exoPlayer.mediaItemCount == 0) {
             exoPlayer.setMediaItem(mediaItem)
@@ -139,8 +142,14 @@ class SongServiceHandler @Inject constructor(
     ) {
         when (playerEvent) {
             PlayerEvent.Next -> {
-                Log.d("SongServiceHandler", "Next button pressed, hasNext: ${exoPlayer.hasNextMediaItem()}")
-                Log.d("SongServiceHandler", "isCommandAvailable(NEXT): ${exoPlayer.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)}")
+                Log.d(
+                    "SongServiceHandler",
+                    "Next button pressed, hasNext: ${exoPlayer.hasNextMediaItem()}"
+                )
+                Log.d(
+                    "SongServiceHandler",
+                    "isCommandAvailable(NEXT): ${exoPlayer.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)}"
+                )
 
                 if (exoPlayer.hasNextMediaItem() && exoPlayer.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)) {
                     exoPlayer.seekToNextMediaItem()
@@ -155,6 +164,7 @@ class SongServiceHandler @Inject constructor(
                     )
                 }
             }
+
             PlayerEvent.Previous -> {
                 Log.d("SongServiceHandler", "Previous button pressed")
                 if (exoPlayer.hasPreviousMediaItem()) {
@@ -171,13 +181,14 @@ class SongServiceHandler @Inject constructor(
                     )
                 }
             }
+
             PlayerEvent.PlayPause -> playOrPause()
             PlayerEvent.SeekTo -> {
                 Log.d("SongServiceHandler", "Seeking to position: $seekPosition")
                 try {
 
-                        exoPlayer.seekTo(seekPosition)
-                        exoPlayer.seekTo(seekPosition)
+                    exoPlayer.seekTo(seekPosition)
+                    exoPlayer.seekTo(seekPosition)
                 } catch (e: Exception) {
                     Log.e("SongServiceHandler", "Error during seek: ${e.message}", e)
 
@@ -185,6 +196,7 @@ class SongServiceHandler @Inject constructor(
                 }
                 _audioState.value = AudioState.Progress(seekPosition)
             }
+
             PlayerEvent.SelectedAudioChange -> {
                 if (selectedAudioIndex != -1) {
                     exoPlayer.seekToDefaultPosition(selectedAudioIndex)

@@ -278,7 +278,7 @@ fun PlayerScreen(
 
                     CommentState.Success -> {
                         item {
-                            if(comments.isNotEmpty()){
+                            if (comments.isNotEmpty()) {
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -288,12 +288,13 @@ fun PlayerScreen(
                                         CommentRow(comment = comment)
                                     }
                                 }
-                            }else{
-                                Box(modifier = Modifier
-                                    .padding(10.dp)
-                                    .fillMaxWidth(),
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .fillMaxWidth(),
                                     contentAlignment = Alignment.Center
-                                ){
+                                ) {
                                     Text(text = "No comments yet")
                                 }
                             }

@@ -12,11 +12,11 @@ import javax.inject.Inject
 @HiltViewModel
 class LogoutViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-): ViewModel() {
+) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    fun logout(){
+    fun logout() {
         viewModelScope.launch {
             authRepository.logout()
             _authState.value = AuthState.LoggedOut
@@ -24,7 +24,7 @@ class LogoutViewModel @Inject constructor(
     }
 }
 
-sealed class AuthState{
-    object Idle: AuthState()
-    object LoggedOut: AuthState()
+sealed class AuthState {
+    object Idle : AuthState()
+    object LoggedOut : AuthState()
 }

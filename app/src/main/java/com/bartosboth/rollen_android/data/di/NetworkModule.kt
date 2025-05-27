@@ -66,7 +66,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUserDetailAPI(okHttpClient: OkHttpClient): UserDetailAPI{
+    fun provideUserDetailAPI(okHttpClient: OkHttpClient): UserDetailAPI {
         return Retrofit.Builder()
             .baseUrl("http://${Constants.BASE_URL}/")
             .addConverterFactory(GsonConverterFactory.create())

@@ -32,14 +32,14 @@ class PlaylistDetailViewModel @Inject constructor(
     private val _playlistState = MutableStateFlow<PlaylistState>(PlaylistState.Idle)
     val playlistState = _playlistState.asStateFlow()
 
-    fun getPlaylist(id: Long){
+    fun getPlaylist(id: Long) {
         viewModelScope.launch {
             try {
                 _playlistState.value = PlaylistState.Loading
-                if(id == 0L){
+                if (id == 0L) {
                     val likedSongs = playlistRepository.getLikedSongs()
                     likedSongs.forEach { it.isLiked = true }
-                    likedSongs.let{
+                    likedSongs.let {
                         _playlist.value = Playlist(
                             id = 0L,
                             title = "Liked Songs",
@@ -50,7 +50,7 @@ class PlaylistDetailViewModel @Inject constructor(
                         _playlistState.value = PlaylistState.Success
                     }
 
-                }else{
+                } else {
                     val response = playlistRepository.getPlaylistById(id)
                     response.let {
                         _playlist.value = it

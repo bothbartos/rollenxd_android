@@ -62,16 +62,19 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = RiverBed300,
     outline = RiverBed400
 )
+
 @Composable
-fun Rollen_androidTheme(darkTheme: Boolean = isSystemInDarkTheme(),
-                        dynamicColor: Boolean = false,
-                        content: @Composable () -> Unit
+fun Rollen_androidTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

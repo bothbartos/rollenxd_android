@@ -53,7 +53,7 @@ fun ProfileScreen(
     updateState: UpdateState,
     onProfileUpdate: (String, Uri?) -> Unit,
     navController: NavController
-    ) {
+) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showEditForm by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -98,49 +98,54 @@ fun ProfileScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-            ) {
+        ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     CircularBase64ImageButton(
                         userDetail = userDetail,
                         size = 130.dp,
                         modifier = Modifier.padding(5.dp),
-                        onClick = {showEditForm = !showEditForm}
+                        onClick = { showEditForm = !showEditForm }
                     )
                     Column(modifier = Modifier.padding(start = 10.dp)) {
                         Text(userDetail.name)
                         Text(userDetail.email)
-                        CustomButton(text= "Edit Profile", onClick = {showEditForm = !showEditForm})
+                        CustomButton(
+                            text = "Edit Profile",
+                            onClick = { showEditForm = !showEditForm })
                     }
                 }
-                if(userDetail.songs.isEmpty()){
+                if (userDetail.songs.isEmpty()) {
                     Text("No songs uploaded")
-                }else{
+                } else {
                     Text("Your Songs:")
                     LazyRow {
                         itemsIndexed(userDetail.songs) { index, song ->
                             SongListItem(
                                 song = song,
                                 isPlaying = false,
-                                onClick = {  }
+                                onClick = { }
                             )
                         }
                     }
                 }
-                if(showEditForm){
+                if (showEditForm) {
                     UserEditForm(
                         userDetail = userDetail,
                         updateState = updateState,
-                        onSubmit = {bio, profilePicture ->
-                                    onProfileUpdate(bio, profilePicture)
-                                   showEditForm = false},
+                        onSubmit = { bio, profilePicture ->
+                            onProfileUpdate(bio, profilePicture)
+                            showEditForm = false
+                        },
                         onDismiss = { showEditForm = false }
-                        )
+                    )
                 }
             }
         }
@@ -185,11 +190,13 @@ fun UserEditForm(
 
         CustomButton(
             text = "Select Profile Picture",
-            onClick = { pickMedia.launch(
-                PickVisualMediaRequest(
-                    mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+            onClick = {
+                pickMedia.launch(
+                    PickVisualMediaRequest(
+                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
                 )
-            ) }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -221,7 +228,7 @@ fun UserEditForm(
                 onClick = {
                     profilePictureUri?.let { uri ->
 
-                            onSubmit(bio, uri)
+                        onSubmit(bio, uri)
                     } ?: onSubmit(bio, null)
                 },
                 isEnabled = updateState !is UpdateState.Loading,

@@ -7,4 +7,4 @@ import kotlinx.parcelize.Parcelize
 data class NewPlaylist(
     val title: String,
     val songId: List<Long>
-): Parcelable
+) : Parcelable

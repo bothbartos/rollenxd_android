@@ -1,4 +1,3 @@
-
 package com.bartosboth.rollen_android.ui.screens.audio
 
 import android.annotation.SuppressLint
@@ -133,12 +132,13 @@ class AudioViewModel @Inject constructor(
                 var playlist =
                     when (id) {
                         0L -> Playlist(
-                                id = 0L,
-                                title = "Liked Songs",
-                                author = "You",
-                                coverBase64 = Constants.LIKED_SONG_BASE64,
-                                songs = likedSongs
-                            )
+                            id = 0L,
+                            title = "Liked Songs",
+                            author = "You",
+                            coverBase64 = Constants.LIKED_SONG_BASE64,
+                            songs = likedSongs
+                        )
+
                         else -> playlistRepo.getPlaylistById(id)
                     }
                 _selectedPlaylist.value = playlist
@@ -156,7 +156,7 @@ class AudioViewModel @Inject constructor(
     fun playPlaylistSong(songId: Long, playlistId: Long) {
         viewModelScope.launch {
             try {
-                val playlist = when(playlistId) {
+                val playlist = when (playlistId) {
                     0L -> Playlist(
                         id = 0L,
                         title = "Liked Songs",
@@ -164,8 +164,9 @@ class AudioViewModel @Inject constructor(
                         coverBase64 = Constants.LIKED_SONG_BASE64,
                         songs = likedSongs
                     )
+
                     else -> {
-                        if(_selectedPlaylist.value.id != playlistId){
+                        if (_selectedPlaylist.value.id != playlistId) {
                             playlistRepo.getPlaylistById(playlistId)
                         } else {
                             _selectedPlaylist.value
@@ -185,7 +186,6 @@ class AudioViewModel @Inject constructor(
                     _currentSelectedAudio.value = playlist.songs[songIndex]
                     songServiceHandler.playStreamingAudio(songId)
                 }
-
 
 
             } catch (e: Exception) {
@@ -234,25 +234,25 @@ class AudioViewModel @Inject constructor(
 
     fun uploadSong(title: String, audioFile: Uri?, coverImage: Uri?) {
         viewModelScope.launch {
-            try{
+            try {
                 val response = audioRepo.uploadSong(title, audioFile, coverImage)
-                if(response == 200){
+                if (response == 200) {
                     loadAudioData()
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun createPlaylist(title: String, songId: List<Long>){
+    fun createPlaylist(title: String, songId: List<Long>) {
         viewModelScope.launch {
-            try{
+            try {
                 val response = playlistRepo.createPlaylist(NewPlaylist(title, songId))
-                if(response == 200){
+                if (response == 200) {
                     loadAudioData()
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }

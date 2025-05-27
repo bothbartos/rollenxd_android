@@ -7,4 +7,4 @@ import kotlinx.parcelize.Parcelize
 data class UserUpdateDetail(
     val bio: String,
     val profilePictureBase64: String
-): Parcelable
+) : Parcelable

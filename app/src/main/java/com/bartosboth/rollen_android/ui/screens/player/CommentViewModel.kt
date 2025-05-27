@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CommentViewModel @Inject constructor(
     private val commentRepository: CommentRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments = _comments.asStateFlow()
@@ -21,31 +21,32 @@ class CommentViewModel @Inject constructor(
     private val _commentState = MutableStateFlow<CommentState>(CommentState.Idle)
     val commentState = _commentState.asStateFlow()
 
-    fun getComments(songId: Long){
+    fun getComments(songId: Long) {
         viewModelScope.launch {
-            try{
+            try {
                 _commentState.value = CommentState.Loading
                 val response = commentRepository.getCommentsBySongId(songId)
                 response.let {
                     _comments.value = it
                     _commentState.value = CommentState.Success
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _commentState.value = CommentState.Error("Loading error: ${e.message}")
             }
         }
     }
 
-    fun addComment(songId: Long, text: String){
+    fun addComment(songId: Long, text: String) {
         viewModelScope.launch {
-            try{
+            try {
                 _commentState.value = CommentState.Loading
                 val response = commentRepository.addComment(songId, text)
 
                 response.let {
                     _commentState.value = CommentState.Success
-                    _comments.value = _comments.value + response                }
-            }catch (e: Exception){
+                    _comments.value = _comments.value + response
+                }
+            } catch (e: Exception) {
                 _commentState.value = CommentState.Error("Error adding comment: ${e.message}")
             }
         }

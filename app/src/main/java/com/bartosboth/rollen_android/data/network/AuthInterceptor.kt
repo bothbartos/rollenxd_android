@@ -13,15 +13,18 @@ class AuthInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        if(originalRequest.url.encodedPath.contains("login") || originalRequest.url.encodedPath.contains("register")) {
+        if (originalRequest.url.encodedPath.contains("login") || originalRequest.url.encodedPath.contains(
+                "register"
+            )
+        ) {
             return chain.proceed(originalRequest)
         }
         val token = tokenManager.getAccessToken()
-        val modifiedRequest = if(!token.isNullOrEmpty()) {
+        val modifiedRequest = if (!token.isNullOrEmpty()) {
             originalRequest.newBuilder()
                 .header("Authorization", "Bearer $token")
                 .build()
-        }else{
+        } else {
             originalRequest
         }
         val response = chain.proceed(modifiedRequest)

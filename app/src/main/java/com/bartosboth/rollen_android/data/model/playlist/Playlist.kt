@@ -11,4 +11,4 @@ data class Playlist(
     val author: String,
     val coverBase64: String,
     val songs: List<Song>
-): Parcelable
+) : Parcelable

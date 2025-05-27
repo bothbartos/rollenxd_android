@@ -1059,7 +1059,9 @@ fun CreatePlaylistDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth().height(400.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
                 ) {
                     itemsIndexed(songs) { index, song ->
                         SongListRowItem(

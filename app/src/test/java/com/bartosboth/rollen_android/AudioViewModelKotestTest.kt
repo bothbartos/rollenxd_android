@@ -64,8 +64,18 @@ class AudioViewModelKotestTest : StringSpec({
     )
 
     val testPlaylists = listOf(
-        PlaylistData(id = 1L, title = "Playlist 1", author = "User 1", coverBase64 = Constants.LIKED_SONG_BASE64),
-        PlaylistData(id = 2L, title = "Playlist 2", author = "User 2", coverBase64 = Constants.LIKED_SONG_BASE64)
+        PlaylistData(
+            id = 1L,
+            title = "Playlist 1",
+            author = "User 1",
+            coverBase64 = Constants.LIKED_SONG_BASE64
+        ),
+        PlaylistData(
+            id = 2L,
+            title = "Playlist 2",
+            author = "User 2",
+            coverBase64 = Constants.LIKED_SONG_BASE64
+        )
     )
 
     val testPlaylist = Playlist(
@@ -203,7 +213,7 @@ class AudioViewModelKotestTest : StringSpec({
         // Setup
         coEvery { audioRepo.getAudioData() } returns testSongs
         coEvery { playlistRepo.getPlaylists() } returns testPlaylists
-        coEvery { audioRepo.getLikedSongs() } returns testSongs.map{ it.copy(isLiked = true)}
+        coEvery { audioRepo.getLikedSongs() } returns testSongs.map { it.copy(isLiked = true) }
         every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
 
         testDispatcher.scheduler.advanceUntilIdle()
@@ -368,7 +378,13 @@ class AudioViewModelKotestTest : StringSpec({
         val coverImage = mockk<Uri>()
         val errorMessage = "Upload failed"
 
-        coEvery { audioRepo.uploadSong(title, audioFile, coverImage) } throws Exception(errorMessage)
+        coEvery {
+            audioRepo.uploadSong(
+                title,
+                audioFile,
+                coverImage
+            )
+        } throws Exception(errorMessage)
 
         // Execute
         viewModel.uploadSong(title, audioFile, coverImage)
@@ -456,7 +472,6 @@ class AudioViewModelKotestTest : StringSpec({
         coVerify(exactly = 0) { audioRepo.getAudioData() }
         coVerify(exactly = 0) { playlistRepo.getPlaylists() }
     }
-
 
 
 })

@@ -52,7 +52,8 @@ fun RegisterScreen(
                 errorMessage = (registerState as RegisterState.Error).message
                 showError = true
             }
-            else -> {  }
+
+            else -> {}
         }
     }
 
@@ -108,7 +109,8 @@ fun RegisterScreen(
             imeAction = ImeAction.Done,
             onImeAction = {
                 if (username.isNotEmpty() && email.isNotEmpty() &&
-                    password.isNotEmpty() && password == confirmPassword) {
+                    password.isNotEmpty() && password == confirmPassword
+                ) {
                     viewModel.register(username, email, password)
                 }
             },

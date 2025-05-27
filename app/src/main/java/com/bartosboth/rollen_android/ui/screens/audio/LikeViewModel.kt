@@ -12,13 +12,13 @@ import javax.inject.Inject
 @HiltViewModel
 class LikeViewModel @Inject constructor(
     private val audioRepository: AudioRepository
-) : ViewModel(){
+) : ViewModel() {
     private val _likedSongIds = MutableStateFlow<Set<Long>>(emptySet())
     val likedSongIds = _likedSongIds.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _likedSongIds.value = audioRepository.getLikedSongs().map { it.id}.toSet()
+            _likedSongIds.value = audioRepository.getLikedSongs().map { it.id }.toSet()
         }
     }
 

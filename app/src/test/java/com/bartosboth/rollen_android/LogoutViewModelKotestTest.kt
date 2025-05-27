@@ -16,7 +16,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LogoutViewModelKotestTest: StringSpec({
+class LogoutViewModelKotestTest : StringSpec({
     lateinit var viewModel: LogoutViewModel
     lateinit var authRepository: AuthRepository
     val testDispatchers = StandardTestDispatcher()

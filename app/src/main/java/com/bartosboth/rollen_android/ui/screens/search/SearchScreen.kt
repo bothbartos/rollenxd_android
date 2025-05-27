@@ -73,7 +73,7 @@ fun SearchScreen(
                             searchQuery = it
                             onTextChange(it)
                         },
-                        placeholder = { Text(text = "Search...")},
+                        placeholder = { Text(text = "Search...") },
                         singleLine = true,
                         maxLines = 1,
                         modifier = Modifier.fillMaxWidth(),
@@ -83,14 +83,18 @@ fun SearchScreen(
                             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
                             focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                alpha = 0.7f
+                            ),
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                alpha = 0.7f
+                            ),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                         ),
                         shape = RoundedCornerShape(10.dp),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
-                        )
+                    )
                 },
                 actions = {
                     if (searchQuery.isNotEmpty()) {
@@ -108,7 +112,10 @@ fun SearchScreen(
                 modifier = Modifier.fillMaxWidth(),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -139,26 +146,29 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             color = MaterialTheme.colorScheme.background
-        ){
-            when(searchState){
+        ) {
+            when (searchState) {
                 is SearchState.Error -> {
-                    Box(contentAlignment = Alignment.Center){
+                    Box(contentAlignment = Alignment.Center) {
                         Text(text = "Error: ${searchState.message}")
                     }
                 }
+
                 SearchState.Idle -> {
-                    Box(contentAlignment = Alignment.Center){
+                    Box(contentAlignment = Alignment.Center) {
                         Text(text = "Search for songs by title or author name")
                     }
                 }
+
                 SearchState.Loading -> {
-                    Box(contentAlignment = Alignment.Center){
+                    Box(contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
+
                 SearchState.Success -> {
-                    if(searchResult.isEmpty()){
-                        Box(contentAlignment = Alignment.Center){
+                    if (searchResult.isEmpty()) {
+                        Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = "No songs found",
                             )

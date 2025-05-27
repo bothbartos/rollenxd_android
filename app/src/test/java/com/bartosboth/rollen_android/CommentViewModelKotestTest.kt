@@ -56,7 +56,7 @@ class CommentViewModelKotestTest : StringSpec({
         viewModel.commentState.value shouldBe CommentState.Success
     }
 
-    "should handle error when loading comments"{
+    "should handle error when loading comments" {
         coEvery { commentRepository.getCommentsBySongId(1L) } throws Exception("Network error")
         viewModel.getComments(1L)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -78,8 +78,13 @@ class CommentViewModelKotestTest : StringSpec({
 
     }
 
-    "should handle error when adding comment"{
-        coEvery { commentRepository.addComment(1L, "New comment") } throws Exception("Network error")
+    "should handle error when adding comment" {
+        coEvery {
+            commentRepository.addComment(
+                1L,
+                "New comment"
+            )
+        } throws Exception("Network error")
         viewModel.addComment(1L, "New comment")
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.commentState.value shouldBe CommentState.Error("Error adding comment: Network error")

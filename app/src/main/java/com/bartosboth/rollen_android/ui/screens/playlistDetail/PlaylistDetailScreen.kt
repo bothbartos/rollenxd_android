@@ -145,10 +145,10 @@ fun PlaylistDetailScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                         .padding(
-                                        start = 30.dp,
-                                        end = 16.dp,
-                                        bottom = 16.dp
-                                    )
+                                            start = 30.dp,
+                                            end = 16.dp,
+                                            bottom = 16.dp
+                                        )
                                 ) {
                                     Text(
                                         text = playlist.title,
@@ -213,7 +213,7 @@ fun PlaylistSongRow(
     onSongLike: (Long) -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
     isLiked: Boolean
-    ){
+) {
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = surfaceColour,

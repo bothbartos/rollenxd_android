@@ -28,7 +28,10 @@ class AudioRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("AudioRepository", "Error getting all songs: ${response.code()} - ${response.message()}")
+            Log.e(
+                "AudioRepository",
+                "Error getting all songs: ${response.code()} - ${response.message()}"
+            )
             throw HttpException(response)
         }
         response.body()!!
@@ -39,9 +42,12 @@ class AudioRepository @Inject constructor(
         val response = songApi.likeSong(id)
 
         if (response.isSuccessful) {
-             response.body() ?: throw IllegalStateException("Response body is null")
+            response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("AudioRepository", "Error liking song: ${response.code()} - ${response.message()}")
+            Log.e(
+                "AudioRepository",
+                "Error liking song: ${response.code()} - ${response.message()}"
+            )
             throw HttpException(response)
         }
         response.code()
@@ -51,9 +57,12 @@ class AudioRepository @Inject constructor(
         val response = songApi.unlikeSong(id)
 
         if (response.isSuccessful) {
-             response.body() ?: throw IllegalStateException("Response body is null")
+            response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("AudioRepository", "Error disliking song: ${response.code()} - ${response.message()}")
+            Log.e(
+                "AudioRepository",
+                "Error disliking song: ${response.code()} - ${response.message()}"
+            )
             throw HttpException(response)
         }
         response.code()
@@ -64,29 +73,40 @@ class AudioRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw IllegalStateException("Response body is null")
         } else {
-            Log.e("AudioRepository", "Error getting liked songs: ${response.code()} - ${response.message()}")
+            Log.e(
+                "AudioRepository",
+                "Error getting liked songs: ${response.code()} - ${response.message()}"
+            )
             throw HttpException(response)
         }
         response.body()!!
     }
 
-    suspend fun uploadSong(title: String, audioFile: Uri?, coverImage: Uri?): Int = withContext(Dispatchers.IO) {
-        val titlePart = title.toRequestBody("text/plain".toMediaTypeOrNull())
+    suspend fun uploadSong(title: String, audioFile: Uri?, coverImage: Uri?): Int =
+        withContext(Dispatchers.IO) {
+            val titlePart = title.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        val audioFilePart = createMultipartFromUri(audioFile!!, "file", "audio")
-        val coverImagePart = createMultipartFromUri(coverImage!!, "cover", "image")
+            val audioFilePart = createMultipartFromUri(audioFile!!, "file", "audio")
+            val coverImagePart = createMultipartFromUri(coverImage!!, "cover", "image")
 
-        val response = songApi.uploadSong(titlePart, audioFilePart, coverImagePart)
-        if (response.isSuccessful) {
-            response.body() ?: throw IllegalStateException("Response body is null")
-        }else{
-            Log.e("AudioRepository", "Error uploading song: ${response.code()} - ${response.message()}")
-            throw HttpException(response)
+            val response = songApi.uploadSong(titlePart, audioFilePart, coverImagePart)
+            if (response.isSuccessful) {
+                response.body() ?: throw IllegalStateException("Response body is null")
+            } else {
+                Log.e(
+                    "AudioRepository",
+                    "Error uploading song: ${response.code()} - ${response.message()}"
+                )
+                throw HttpException(response)
+            }
+            response.code()
         }
-        response.code()
-    }
 
-    private fun createMultipartFromUri(uri: Uri, paramName: String, fileType: String): MultipartBody.Part {
+    private fun createMultipartFromUri(
+        uri: Uri,
+        paramName: String,
+        fileType: String
+    ): MultipartBody.Part {
         val fileName = getFileNameFromUri(uri) ?: "${fileType}_${System.currentTimeMillis()}"
 
         val tempFile = File(context.cacheDir, fileName)

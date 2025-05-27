@@ -108,7 +108,12 @@ class UserDetailViewModelKotestTest : StringSpec({
     "should update user details successfully" {
         // Setup
         val testUri = mockk<Uri>()
-        coEvery { userDetailRepository.updateUserDetail("Updated bio", testUri) } returns testUpdateDetail
+        coEvery {
+            userDetailRepository.updateUserDetail(
+                "Updated bio",
+                testUri
+            )
+        } returns testUpdateDetail
 
         // Execute
         viewModel.updateUserDetails("Updated bio", testUri)
@@ -130,7 +135,9 @@ class UserDetailViewModelKotestTest : StringSpec({
         // Setup
         val testUri = mockk<Uri>()
         val errorMessage = "Network error"
-        coEvery { userDetailRepository.updateUserDetail(any(), any()) } throws Exception(errorMessage)
+        coEvery { userDetailRepository.updateUserDetail(any(), any()) } throws Exception(
+            errorMessage
+        )
 
         // Execute
         viewModel.updateUserDetails("Updated bio", testUri)

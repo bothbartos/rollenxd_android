@@ -73,7 +73,7 @@ fun RollenXdNavigation() {
         }
 
         navigation(startDestination = MainScreen, route = MainFlow::class) {
-            composable<MainScreen> {backstackEntry ->
+            composable<MainScreen> { backstackEntry ->
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
@@ -103,7 +103,7 @@ fun RollenXdNavigation() {
                     onUploadSong = { title, audioFile, coverImage ->
                         audioViewModel.uploadSong(title, audioFile, coverImage)
                     },
-                    onCreatePlaylist = {title, songId ->
+                    onCreatePlaylist = { title, songId ->
                         audioViewModel.createPlaylist(title, songId)
                     }
                 )
@@ -157,7 +157,7 @@ fun RollenXdNavigation() {
 
             }
 
-            composable<PlayerScreen> {backstackEntry ->
+            composable<PlayerScreen> { backstackEntry ->
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
@@ -171,7 +171,7 @@ fun RollenXdNavigation() {
                 val commentState = commentViewModel.commentState.collectAsState().value
 
                 LaunchedEffect(audioViewModel.currentSelectedAudio.id) {
-                    if(audioViewModel.currentSelectedAudio.id != -1L){
+                    if (audioViewModel.currentSelectedAudio.id != -1L) {
                         commentViewModel.getComments(audioViewModel.currentSelectedAudio.id)
                     }
                 }
@@ -201,7 +201,7 @@ fun RollenXdNavigation() {
                 )
             }
 
-            composable<SearchScreen> {backstackEntry ->
+            composable<SearchScreen> { backstackEntry ->
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
@@ -236,7 +236,7 @@ fun RollenXdNavigation() {
 
             }
 
-            composable<ProfileScreen> {backstackEntry ->
+            composable<ProfileScreen> { backstackEntry ->
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }

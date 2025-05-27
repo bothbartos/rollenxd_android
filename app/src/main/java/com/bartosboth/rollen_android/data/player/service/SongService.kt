@@ -14,8 +14,10 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SongService : MediaSessionService() {
-    @Inject lateinit var mediaSession: MediaSession
-    @Inject lateinit var exoPlayer: ExoPlayer
+    @Inject
+    lateinit var mediaSession: MediaSession
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
 
     override fun onCreate() {
         Log.d("SongService", "onCreate called")

@@ -8,4 +8,4 @@ class LoginResponse(
     val jwtSecret: String,
     val username: String,
     val roles: List<String>
-): Parcelable
+) : Parcelable

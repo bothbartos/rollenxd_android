@@ -76,13 +76,13 @@ fun MainScreen(
     if (showUploadSongDialog) {
         UploadSongDialog(
             onDismiss = { showUploadSongDialog = false },
-            onUpload = {title, audioFile, coverImage ->
+            onUpload = { title, audioFile, coverImage ->
                 onUploadSong(title, audioFile, coverImage)
             }
         )
     }
 
-    if(showPlaylistCreationDialog){
+    if (showPlaylistCreationDialog) {
         CreatePlaylistDialog(
             onDismiss = { showPlaylistCreationDialog = false },
             onCreate = { title, songId ->

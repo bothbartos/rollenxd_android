@@ -9,4 +9,4 @@ data class PlaylistData(
     val title: String,
     val author: String,
     val coverBase64: String,
-): Parcelable
+) : Parcelable

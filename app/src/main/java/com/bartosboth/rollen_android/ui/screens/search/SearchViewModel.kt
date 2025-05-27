@@ -35,9 +35,9 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _searchQuery
                 .debounce(500)
-                .filter { it.isNotEmpty()  }
+                .filter { it.isNotEmpty() }
                 .distinctUntilChanged()
-                .collectLatest {query ->
+                .collectLatest { query ->
                     searchSongs(query)
                 }
         }
@@ -45,28 +45,28 @@ class SearchViewModel @Inject constructor(
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
-        if(query.isEmpty()){
+        if (query.isEmpty()) {
             _searchResult.value = emptyList()
             _searchState.value = SearchState.Idle
         }
     }
 
-     private fun searchSongs(search: String) {
-         viewModelScope.launch {
-             try{
-                 _searchState.value = SearchState.Loading
-                 Log.d("SEARCH", "searchSongs: $search")
-                 val response = searchRepository.searchSongs(search)
-                 response.let{
-                     _searchResult.value = it
-                     _searchState.value = SearchState.Success
-                 }
-             }catch (e: Exception){
-                 Log.d("SEARCH_ERR", "searchSongs: error:${e.message}")
-                 _searchState.value = SearchState.Error("Error: ${e.message}")
-             }
+    private fun searchSongs(search: String) {
+        viewModelScope.launch {
+            try {
+                _searchState.value = SearchState.Loading
+                Log.d("SEARCH", "searchSongs: $search")
+                val response = searchRepository.searchSongs(search)
+                response.let {
+                    _searchResult.value = it
+                    _searchState.value = SearchState.Success
+                }
+            } catch (e: Exception) {
+                Log.d("SEARCH_ERR", "searchSongs: error:${e.message}")
+                _searchState.value = SearchState.Error("Error: ${e.message}")
+            }
 
-         }
+        }
 
     }
 }

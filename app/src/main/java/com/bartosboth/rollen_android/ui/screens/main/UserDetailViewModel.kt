@@ -26,7 +26,7 @@ private val userDetailDummy = UserDetail(
 class UserDetailViewModel @Inject constructor(
     private val userDetailRepository: UserDetailRepository,
     private val tokenManager: TokenManager
-): ViewModel(){
+) : ViewModel() {
     private val _userDetails = MutableStateFlow(userDetailDummy)
     val userDetails: StateFlow<UserDetail> = _userDetails.asStateFlow()
 
@@ -40,24 +40,24 @@ class UserDetailViewModel @Inject constructor(
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
 
-    init{
+    init {
         viewModelScope.launch {
             tokenManager.isLoggedIn.collect {
-                if(it) loadUserDetails()
+                if (it) loadUserDetails()
                 else resetState()
             }
         }
     }
 
 
-    private fun loadUserDetails(){
+    private fun loadUserDetails() {
         viewModelScope.launch {
-            try{
+            try {
                 val userDetail = userDetailRepository.getUserDetail()
                 _userDetails.value = userDetail
                 _bio.value = userDetail.bio
                 _profilePictureBase64.value = userDetail.profileImageBase64
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -83,7 +83,7 @@ class UserDetailViewModel @Inject constructor(
         }
     }
 
-    fun resetState(){
+    fun resetState() {
         _userDetails.value = userDetailDummy
         _bio.value = ""
         _profilePictureBase64.value = ""

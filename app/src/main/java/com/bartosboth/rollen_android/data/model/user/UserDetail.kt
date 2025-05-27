@@ -12,4 +12,4 @@ data class UserDetail(
     val bio: String,
     val profileImageBase64: String,
     val songs: List<Song>,
-): Parcelable
+) : Parcelable
