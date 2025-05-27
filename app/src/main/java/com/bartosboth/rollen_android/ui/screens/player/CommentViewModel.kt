@@ -44,9 +44,10 @@ class CommentViewModel @Inject constructor(
                 _commentState.value = CommentState.Loading
                 Log.d("ADD_COMMENT", "addComment: $text")
                 val response = commentRepository.addComment(songId, text)
+                Log.d("ADD_COMMENT_RESPONSE", "addComment: ${response.text}")
                 response.let {
                     _commentState.value = CommentState.Success
-                    getComments(songId)
+                    _comments.value+= response
                 }
             }catch (e: Exception){
                 _commentState.value = CommentState.Error("Loading error: ${e.message}")

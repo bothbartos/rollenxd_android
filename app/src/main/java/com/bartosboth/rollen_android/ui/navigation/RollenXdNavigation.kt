@@ -162,8 +162,6 @@ fun RollenXdNavigation() {
                     navController.getBackStackEntry(MainFlow)
                 }
 
-                val songId =
-                    backstackEntry.arguments?.getLong(PlayerScreen.SONG_ID_ARG) ?: -1L
                 val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
                 val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
                 val commentViewModel: CommentViewModel = hiltViewModel(parentEntry)
@@ -172,9 +170,9 @@ fun RollenXdNavigation() {
                 val comments = commentViewModel.comments.collectAsState().value
                 val commentState = commentViewModel.commentState.collectAsState().value
 
-                LaunchedEffect(songId) {
-                    if(songId != -1L){
-                        commentViewModel.getComments(songId)
+                LaunchedEffect(audioViewModel.currentSelectedAudio.id) {
+                    if(audioViewModel.currentSelectedAudio.id != -1L){
+                        commentViewModel.getComments(audioViewModel.currentSelectedAudio.id)
                     }
                 }
 

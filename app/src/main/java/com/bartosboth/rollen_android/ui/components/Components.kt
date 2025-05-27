@@ -185,7 +185,7 @@ fun ScreenContainer(content: @Composable () -> Unit) {
 fun CoverImage(
     modifier: Modifier = Modifier,
     coverBase64: String,
-    songId: Long,
+    songId: String,
     size: Dp,
     shape: Shape = RoundedCornerShape(4.dp),
     shadowElevation: Dp = 0.dp
@@ -208,8 +208,8 @@ fun CoverImage(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(convertBase64ToByteArr(coverBase64))
-                    .memoryCacheKey(songId.toString())
-                    .placeholderMemoryCacheKey(songId.toString())
+                    .memoryCacheKey(songId)
+                    .placeholderMemoryCacheKey(songId)
                     .build(),
                 contentDescription = "Cover",
                 contentScale = ContentScale.Crop,
@@ -399,7 +399,7 @@ fun SongListItem(
         ) {
             CoverImage(
                 coverBase64 = song.coverBase64,
-                songId = song.id,
+                songId = song.id.toString(),
                 size = 160.dp,
                 shadowElevation = 4.dp
             )
@@ -457,7 +457,7 @@ fun SongListRowItem(
         ) {
             CoverImage(
                 coverBase64 = song.coverBase64,
-                songId = song.id,
+                songId = song.id.toString(),
                 size = 130.dp,
                 shadowElevation = 4.dp
             )
@@ -515,7 +515,7 @@ fun PlaylistListItem(
         ) {
             CoverImage(
                 coverBase64 = playlist.coverBase64,
-                songId = playlist.id,
+                songId = playlist.id.toString(),
                 size = 160.dp,
                 shadowElevation = 4.dp
             )
@@ -589,7 +589,7 @@ fun MiniPlayerBar(
                         ) {
                         CoverImage(
                             coverBase64 = audio.coverBase64,
-                            songId = audio.id,
+                            songId = audio.id.toString(),
                             size = 53.dp
                         )
 
