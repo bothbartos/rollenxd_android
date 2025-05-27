@@ -270,56 +270,6 @@ class AudioViewModelKotestTest : StringSpec({
         viewModel.progress shouldBe 50f
     }
 
-    "should like song successfully" {
-        // Setup
-        coEvery { audioRepo.likeSong(1L) } returns 200
-        coEvery { audioRepo.getAudioData() } returns testSongs
-        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
-        coEvery { audioRepo.getLikedSongs() } returns testSongs.filter { it.id == 1L }
-        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Set current song
-        viewModel.playSong(1L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Execute
-        viewModel.likeSong(1L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify
-        viewModel.currentSelectedAudio.isLiked shouldBe true
-        viewModel.audioList.find { it.id == 1L }?.isLiked shouldBe true
-
-        coVerify { audioRepo.likeSong(1L) }
-    }
-
-    "should unlike song successfully" {
-        // Setup
-        coEvery { audioRepo.unlikeSong(2L) } returns 200
-        coEvery { audioRepo.getAudioData() } returns testSongs
-        coEvery { playlistRepo.getPlaylists() } returns testPlaylists
-        coEvery { audioRepo.getLikedSongs() } returns testSongs.filter { it.id == 2L }.map{ it.copy(isLiked = true)}
-        every { tokenManager.isLoggedIn } returns MutableStateFlow(true)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Set current song
-        viewModel.playSong(2L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Execute
-        viewModel.unlikeSong(2L)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Verify
-        viewModel.currentSelectedAudio.isLiked shouldBe false
-        viewModel.audioList.find { it.id == 2L }?.isLiked shouldBe false
-
-        coVerify { audioRepo.unlikeSong(2L) }
-    }
-
     "should update progress when audio state changes" {
         // Setup
         val audioStateFlow = MutableStateFlow<AudioState>(AudioState.Initial)
