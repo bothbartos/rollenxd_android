@@ -4,6 +4,7 @@ import android.content.Context
 import com.bartosboth.rollen_android.data.manager.TokenManager
 import com.bartosboth.rollen_android.data.network.AuthAPI
 import com.bartosboth.rollen_android.data.network.AuthInterceptor
+import com.bartosboth.rollen_android.data.network.CommentAPI
 import com.bartosboth.rollen_android.data.network.PlaylistAPI
 import com.bartosboth.rollen_android.data.network.SearchAPI
 import com.bartosboth.rollen_android.data.network.SongAPI
@@ -94,5 +95,16 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(SearchAPI::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCommentAPI(okHttpClient: OkHttpClient): CommentAPI {
+        return Retrofit.Builder()
+            .baseUrl("http://${Constants.BASE_URL}/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(CommentAPI::class.java)
     }
 }

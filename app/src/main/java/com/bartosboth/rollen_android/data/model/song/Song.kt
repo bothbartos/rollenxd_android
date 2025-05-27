@@ -1,6 +1,5 @@
 package com.bartosboth.rollen_android.data.model.song
 
-import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 

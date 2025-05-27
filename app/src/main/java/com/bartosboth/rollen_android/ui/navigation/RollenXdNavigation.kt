@@ -21,6 +21,7 @@ import com.bartosboth.rollen_android.ui.screens.login.LoginScreen
 import com.bartosboth.rollen_android.ui.screens.login.LoginViewModel
 import com.bartosboth.rollen_android.ui.screens.main.MainScreen
 import com.bartosboth.rollen_android.ui.screens.main.UserDetailViewModel
+import com.bartosboth.rollen_android.ui.screens.player.CommentViewModel
 import com.bartosboth.rollen_android.ui.screens.player.PlayerScreen
 import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailScreen
 import com.bartosboth.rollen_android.ui.screens.playlistDetail.PlaylistDetailViewModel
@@ -107,7 +108,6 @@ fun RollenXdNavigation() {
                     }
                 )
             }
-
             composable<PlaylistDetailScreen> { backstackEntry ->
                 val playlistId =
                     backstackEntry.arguments?.getLong(PlaylistDetailScreen.PLAYLIST_ID_ARG) ?: -1L
@@ -139,7 +139,7 @@ fun RollenXdNavigation() {
                     isAudioPlaying = audioViewModel.isPlaying,
                     currentPlayingAudio = audioViewModel.currentSelectedAudio,
                     onCurrentSongLike = { likeViewModel.toggleLike(audioViewModel.currentSelectedAudio.id) },
-                    onSongLike = { likeViewModel.toggleLike(it.id) },
+                    onSongLike = { likeViewModel.toggleLike(it) },
                     playPlaylist = {
                         if (audioViewModel.selectedPlaylist.id == it) audioViewModel
                             .onUiEvent(UiEvents.PlayPause)
@@ -161,10 +161,20 @@ fun RollenXdNavigation() {
                 val parentEntry = remember(backstackEntry) {
                     navController.getBackStackEntry(MainFlow)
                 }
+
                 val audioViewModel: AudioViewModel = hiltViewModel(parentEntry)
                 val likeViewModel: LikeViewModel = hiltViewModel(parentEntry)
+                val commentViewModel: CommentViewModel = hiltViewModel(parentEntry)
 
                 val likedSongIds = likeViewModel.likedSongIds.collectAsState()
+                val comments = commentViewModel.comments.collectAsState().value
+                val commentState = commentViewModel.commentState.collectAsState().value
+
+                LaunchedEffect(audioViewModel.currentSelectedAudio.id) {
+                    if(audioViewModel.currentSelectedAudio.id != -1L){
+                        commentViewModel.getComments(audioViewModel.currentSelectedAudio.id)
+                    }
+                }
 
                 PlayerScreen(
                     navController = navController,
@@ -172,6 +182,8 @@ fun RollenXdNavigation() {
                     songId = audioViewModel.currentSelectedAudio.id,
                     title = audioViewModel.currentSelectedAudio.title,
                     author = audioViewModel.currentSelectedAudio.author,
+                    comments = comments,
+                    commentState = commentState,
                     isLiked = likedSongIds.value.contains(audioViewModel.currentSelectedAudio.id),
                     isPlaying = audioViewModel.isPlaying,
                     progress = audioViewModel.progress,
@@ -183,6 +195,9 @@ fun RollenXdNavigation() {
                     onPrevious = { audioViewModel.onUiEvent(UiEvents.Previous) },
                     onPlayPause = { audioViewModel.onUiEvent(UiEvents.PlayPause) },
                     onNext = { audioViewModel.onUiEvent(UiEvents.Next) },
+                    addComment = { songId, text ->
+                        commentViewModel.addComment(songId, text)
+                    }
                 )
             }
 

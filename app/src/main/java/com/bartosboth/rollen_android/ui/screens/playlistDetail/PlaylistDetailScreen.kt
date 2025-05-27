@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -47,7 +48,7 @@ fun PlaylistDetailScreen(
     isAudioPlaying: Boolean,
     currentPlayingAudio: Song,
     onCurrentSongLike: (Long) -> Unit,
-    onSongLike: (Song) -> Unit,
+    onSongLike: (Long) -> Unit,
     playPlaylist: (Long) -> Unit,
     userDetail: UserDetail,
     onStart: () -> Unit,
@@ -129,7 +130,7 @@ fun PlaylistDetailScreen(
                             ) {
                                 CoverImage(
                                     coverBase64 = playlist.coverBase64,
-                                    songId = playlist.id,
+                                    songId = playlist.id.toString(),
                                     size = 250.dp
                                 )
                             }
@@ -138,12 +139,15 @@ fun PlaylistDetailScreen(
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(
                                         start = 30.dp,
-                                        end = 30.dp,
+                                        end = 16.dp,
                                         bottom = 16.dp
                                     )
                                 ) {
@@ -151,7 +155,7 @@ fun PlaylistDetailScreen(
                                         text = playlist.title,
                                         style = MaterialTheme.typography.displaySmall,
                                         fontWeight = FontWeight.Bold,
-                                        maxLines = 1
+                                        maxLines = 2
                                     )
                                     Text(
                                         text = playlist.author,
@@ -207,7 +211,7 @@ fun PlaylistSongRow(
     surfaceColour: Color,
     song: Song,
     playlistId: Long,
-    onSongLike: (Song) -> Unit,
+    onSongLike: (Long) -> Unit,
     onPlaylistSongPlay: (Long, Long) -> Unit,
     isLiked: Boolean
     ){
@@ -226,7 +230,7 @@ fun PlaylistSongRow(
         ) {
             CoverImage(
                 coverBase64 = song.coverBase64,
-                songId = song.id,
+                songId = song.id.toString(),
                 size = 50.dp,
                 modifier = Modifier.padding(start = 8.dp)
             )
@@ -250,7 +254,7 @@ fun PlaylistSongRow(
             }
             LikeButton(
                 isLiked = isLiked,
-                onClick = { onSongLike(song) }
+                onClick = { onSongLike(song.id) }
             )
         }
     }
@@ -314,7 +318,7 @@ fun PlaylistDetailScreenPreview(
                 ) {
                     CoverImage(
                         coverBase64 = playlist.coverBase64,
-                        songId = playlist.id,
+                        songId = playlist.id.toString(),
                         size = 250.dp
                     )
                 }
